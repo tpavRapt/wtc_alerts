@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quick Who-To-Call v.0.99.2 | O-HIST = Historical Order | 13F = Holdings Data | I-CROSS = Intraday IOIs  | O-CROSS = Intraday Order</title>
+    <title>Quick Who-To-Call</title>
 
     <!-- ===============================================-->
     <!--    Stylesheets                                 -->
@@ -61,7 +61,7 @@
                                     <th>IOI Shares</th>
                                     <th>Opportunity to</th>
                                     <th>When</th>
-                                    <th>RefHoldingsCompany</th>
+                                    <th>HoldingsRefAccountID</th>
                                     <th>News</th>
                                 </tr>
                             </thead>
@@ -208,7 +208,10 @@
         }
       }
       </style>
+
       <script>
+        // For window.onload function see end of 06raptor.js
+
         document.getElementById('showLokiDbBtn').onclick = function() {
           // Wait for LokiJS and messagesCollection to be available
           if (window.messagesCollection) {
@@ -219,9 +222,11 @@
           }
           document.getElementById('lokiDbModal').style.display = 'block';
         };
+
         document.getElementById('closeLokiDbModal').onclick = function() {
           document.getElementById('lokiDbModal').style.display = 'none';
         };
+
         // Optional: close modal on background click
         document.getElementById('lokiDbModal').onclick = function(e) {
           if (e.target === this) this.style.display = 'none';
