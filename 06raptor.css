@@ -1,0 +1,191 @@
+/* General table styling */
+.dataTables_wrapper .dataTables_filter {
+    float: right;
+    margin-bottom: 20px; /* Add margin to separate from the table */
+    color: #fff; /* Change text color to white */
+}
+
+.dataTables_wrapper .dataTables_length {
+    float: left;
+    margin-bottom: 20px; /* Add margin to separate from the table */
+    color: #fff; /* Change text color to white */
+}
+
+.dataTables_wrapper .dataTables_info {
+    clear: both;
+    float: left;
+    padding-top: 0.755em;
+    font-size: 12px; /* Smaller font size */
+    color: #fff; /* Change text color to white */
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    float: right;
+    padding-top: 0.25em;
+    color: #fff; /* Change text color to white */
+}
+
+table.dataTable {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 0 auto;
+    clear: both;
+    border-spacing: 0;
+    border: 1px solid #000000;
+    background-color: #2d2d2d;
+    color: #ffffff; /* Change text color to white */
+    font-size: 12px; /* Smaller font size */
+}
+
+table.dataTable thead th {
+    padding: 5px 10px; /* Smaller padding for smaller row height */
+    border-bottom: 1px solid #111;
+    background-color: #3e3e3e;
+    color: #fff; /* Change text color to white */
+    font-size: 12px; /* Smaller font size */
+    font-weight: bold;
+    text-align: left;
+}
+
+table.dataTable tbody td {
+    padding: 5px 10px; /* Smaller padding for smaller row height */
+    border-top: 1px solid #ddd;
+    color: #fff; /* Change text color to white */
+    font-size: 12px; /* Smaller font size */
+}
+
+table.dataTable tbody tr {
+    background-color: #2d2d2d;
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #424242;
+}
+
+.details-control {
+    cursor: pointer;
+    color: #fff; /* Change text color to white */
+}
+
+tr.shown td.details-control:after {
+    margin: 1 auto;
+    content: "▼";
+    /* content: "-"; */
+    font-size: larger;
+    /*color: #fff;  Change text color to white */
+    /*display: inline-block;  Change display to inline-block */
+    margin-left: 10px; /* Add left margin */
+}
+
+tr:not(.shown) td.details-control:after {
+    margin: 1 auto;
+    content: "▶";
+    /* content: "+"; */
+    font-size: larger;
+    color: #fff; /* Change text color to white */
+    display: inline-block; /* Change display to inline-block */
+    margin-left: 10px; /* Add left margin */
+}
+
+
+table.dataTable tbody td .label {
+    display: inline-block;
+    padding: 2px 4px;
+    font-size: 10px; 
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+    border-radius: 3px;
+    margin-right: 2px;
+}
+
+.label-13F {
+    background-color: #1e88e5;
+    cursor: pointer; /* Changes the cursor to a hand pointer */
+}
+
+.newSalesWindow {
+    cursor: pointer; /* Changes the cursor to a hand pointer */
+}
+
+.label-H {
+    background-color: #ffb74d;
+    cursor: pointer;
+}
+
+.label-I {
+    background-color: #e53935;
+    cursor: pointer;
+}
+
+.label-CRM {
+    background-color: #43a047;
+    cursor: pointer;
+}
+
+.status-new {
+    background-color: #ffa726;
+    color: #fff;
+    padding: 2px 5px; /* Smaller padding for smaller height */
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 10px; /* Smaller font size */
+}
+
+/* Dropdown menu styling */
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    background-color: #3e3e3e;
+    color: #fff; /* Change text color to white */
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+
+.dataTables_wrapper .dataTables_length select option {
+    background-color: #3e3e3e;
+    color: #fff; /* Change text color to white */
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    background-color: #3e3e3e;
+    color: #fff; /* Change text color to white */
+    border: 1px solid #555;
+    border-radius: 4px;
+    margin-left: 2px;
+    margin-right: 2px;
+    font-size: 10px; /* Smaller font size for pagination buttons */
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background-color: #ffb74d;
+    color: #fff; /* Change text color to white */
+    border: 1px solid #555;
+    font-size: 10px; /* Smaller font size for pagination buttons */
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background-color: #424242;
+    color: #fff; /* Change text color to white */
+    font-size: 10px; /* Smaller font size for pagination buttons */
+}
+
+/* Styling for search input text */
+.dataTables_wrapper .dataTables_filter input {
+    color: #fff; /* Text color */
+    background-color: #424242; /* Background color */
+    border: 1px solid #555; /* Border color */
+    border-radius: 4px;
+    padding: 5px;
+    font-size: 10px; /* Smaller font size */
+}
+
+.dataTables_wrapper .dataTables_filter input::placeholder {
+    color: #bbb; /* Placeholder text color */
+}
+
+/* Add spacing between table and controls */
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_length {
+    margin-bottom: 20px; /* Space between controls and the table */
+}
+
