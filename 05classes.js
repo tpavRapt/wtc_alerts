@@ -222,82 +222,82 @@ class PostMessage {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // NOT USED
-    retrieveMyClients() {        
-         const message = {
-                 action: 'SELECT',
-                 context: 'query',
-                 database: 'MY_COMPANIES',
-                 filter: 'ALL',
-                 rowId: this.requestId
-             };
-         console.debug(`[DEBUG] My Clients request: ${JSON.stringify(message)}`);
-         return message; 
-    }
-
-    // NOT USED
-    retrieveOrderBySymbol() {
-        const message = {
-            action: 'SELECT',
-            context: 'query',
-            database: 'MESSAGE',
-            filter: 'INBOUND_ORDER',
-            statement: `Symbol=${this.symbol}`,
-            limit: '1',
-            rowId: this.compositeKey
-        };
-        console.log(`DEBUG: Retrieve Order By Symbol request message: ${JSON.stringify(message)}`);
-        return message;
-    }
-    
-    // NOT USED
-    retrieveIOIDetail() { 
-        const message = {
-            action: 'SELECT',
-            context: 'query',
-            database: 'MESSAGE',
-            filter: 'IOI',
-            statement: `Symbol=${this.symbol} and Side=${this.side}`,
-            rowId: this.compositeKey,
-            limit: '1'
-        };
-        console.log(`DEBUG: Retrieve IOI Detail request message: ${JSON.stringify(message)}`);
-        return message;
-    }
-
-    // NOT USED
-    retrieveIoiById() {
-        const message = {
-            action: 'SELECT',
-            context: 'query',
-            database: 'MESSAGE',
-            filter: 'IOI',
-            rowId: this.compositeKey,
-            limit: '1',
-            statement: `MessageId in (${this.compositeKey.split('_')[0]})`
-        };
-        console.log(`DEBUG: Retrieve IOI By ID request message: ${JSON.stringify(message)}`);
-        return message;
-    }
-
-    // NOT USED
-    salesDashboard() {
-        const _params = {
-            domain: 'gui',
-            domainRef: 'window',
-            page: `/WTCDashboard-PartiallyWorking/index.html`,
-            width: '2400',
-            height: '1600'
-        };
-        const message = AddRequiredRequestKeys(undefined, 'POST', _params);
+//    // NOT USED
+//    retrieveMyClients() {        
+//         const message = {
+//                 action: 'SELECT',
+//                 context: 'query',
+//                 database: 'MY_COMPANIES',
+//                 filter: 'ALL',
+//                 rowId: this.requestId
+//             };
+//         console.debug(`[DEBUG] My Clients request: ${JSON.stringify(message)}`);
+//         return message; 
+//    }
+//
+//    // NOT USED
+//    retrieveOrderBySymbol() {
 //        const message = {
-//            action: 'INSERT',
-//            context: 'routes',
-//            statement: '/WTCDashboard-PartiallyWorking/index.html',
+//            action: 'SELECT',
+//            context: 'query',
+//            database: 'MESSAGE',
+//            filter: 'INBOUND_ORDER',
+//            statement: `Symbol=${this.symbol}`,
+//            limit: '1',
+//            rowId: this.compositeKey
+//        };
+//        console.log(`DEBUG: Retrieve Order By Symbol request message: ${JSON.stringify(message)}`);
+//        return message;
+//    }
+//    
+//    // NOT USED
+//    retrieveIOIDetail() { 
+//        const message = {
+//            action: 'SELECT',
+//            context: 'query',
+//            database: 'MESSAGE',
+//            filter: 'IOI',
+//            statement: `Symbol=${this.symbol} and Side=${this.side}`,
+//            rowId: this.compositeKey,
+//            limit: '1'
+//        };
+//        console.log(`DEBUG: Retrieve IOI Detail request message: ${JSON.stringify(message)}`);
+//        return message;
+//    }
+//
+//    // NOT USED
+//    retrieveIoiById() {
+//        const message = {
+//            action: 'SELECT',
+//            context: 'query',
+//            database: 'MESSAGE',
+//            filter: 'IOI',
+//            rowId: this.compositeKey,
+//            limit: '1',
+//            statement: `MessageId in (${this.compositeKey.split('_')[0]})`
+//        };
+//        console.log(`DEBUG: Retrieve IOI By ID request message: ${JSON.stringify(message)}`);
+//        return message;
+//    }
+//
+//    // NOT USED
+//    salesDashboard() {
+//        const _params = {
+//            domain: 'gui',
+//            domainRef: 'window',
+//            page: `/WTCDashboard-PartiallyWorking/index.html`,
 //            width: '2400',
 //            height: '1600'
-//       };
-       console.log(`WINDOW: PartiallyWorking Dashboard for ${this.compositeKey}`);
-       return message;
-    }
+//        };
+//        const message = AddRequiredRequestKeys(undefined, 'POST', _params);
+////        const message = {
+////            action: 'INSERT',
+////            context: 'routes',
+////            statement: '/WTCDashboard-PartiallyWorking/index.html',
+////            width: '2400',
+////            height: '1600'
+////       };
+//       console.log(`WINDOW: PartiallyWorking Dashboard for ${this.compositeKey}`);
+//       return message;
+//    }
 }
