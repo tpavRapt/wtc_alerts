@@ -254,7 +254,7 @@ function ValidateResponseFromRaptor(message)
                     visible: debugTable
                 }
             ],
-            order: [[tableCols.WHEN, 'desc']]
+            order: [[tableCols.DATETIME, 'desc']]
         });    
 
         function formatPrice(price) {
