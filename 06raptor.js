@@ -97,6 +97,23 @@ function AddRequiredResponseKeys(_id, _status, _message, _params) {
     };
 }
 
+function getLclToday() // Todays local date at midnight
+{
+    let date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
+
+function getLclDateTime(now = new Date()) {
+    return String(now.getFullYear()).padStart(4, '0') + '-' +
+        String(now.getMonth()).padStart(2, '0') + '-' +
+        String(now.getDay()).padStart(2, '0') + ' ' +
+        String(now.getHours()).padStart(2, '0') + ':' +
+        String(now.getMinutes()).padStart(2, '0') + ':' +
+        String(now.getSeconds()).padStart(2, '0') + '.' +
+        String(now.getMilliseconds()).padStart(3, '0');
+}
+
 function getLclTime(now = new Date()) {
     return String(now.getHours()).padStart(2, '0') + ':' +
         String(now.getMinutes()).padStart(2, '0') + ':' +
@@ -289,7 +306,7 @@ $(document).ready(
             IOISHARES: 9,
             SIDE: 10,
             WHEN: 11,
-            DATETIME: 12,
+            UTCDATETIME: 12,
             HOLDINGSID: 13,
             NEWS: 14
         };
@@ -330,11 +347,53 @@ $(document).ready(
                     visible: debugTable
                 },
                 {
-                    targets: tableCols.DATETIME,
+                    targets: tableCols.UTCDATETIME,
                     visible: debugTable
                 }
             ],
-            order: [[tableCols.DATETIME, 'desc']]
+            order: [[tableCols.UTCDATETIME, 'desc']]
+        });
+
+        let tableH = $('#messagesTableHistoric').DataTable({
+            responsive: true,
+            columnDefs: [
+                {
+                    className: 'details-control',
+                    orderable: false,
+                    data: null,
+                    defaultContent: '',
+                    targets: tableCols.ARROWBTN
+                },
+                {
+                    name: 'compositeID',
+                    targets: tableCols.ID,
+                    visible: debugTable
+                },
+                {
+                    name: 'Reason',
+                    targets: tableCols.REASON,
+                    width: '230px'
+                },
+                {
+                    name: 'RefTierMessageID',
+                    targets: tableCols.REFTIERMESSAGEID,
+                    visible: debugTable
+                },
+                {
+                    name: 'MessageID',
+                    targets: tableCols.REFMESSAGEID,
+                    visible: debugTable
+                },
+                {
+                    targets: tableCols.MESSAGEID,
+                    visible: debugTable
+                },
+                {
+                    targets: tableCols.UTCDATETIME,
+                    visible: debugTable
+                }
+            ],
+            order: [[tableCols.UTCDATETIME, 'desc']]
         });
 
         function formatPrice(price) {
@@ -475,47 +534,57 @@ $(document).ready(
             return noMili;
         }
 
-        function addAlertMessage(message, params) {
+        function addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime) {
             console.log(`Adding Alert Row:` + message.id);
-            let lclCompletionTime;
-            let lclCompletionDateTime;
-            if (params.CompletionTime !== undefined) {
-                const utcCompletionDateTime = fixDateTimeToJSDate(params.CompletionTime);
-                lclCompletionDateTime = new Date(utcCompletionDateTime);
-                lclCompletionTime = removeMilliseconds(getLclTime(new Date(lclCompletionDateTime)));
+            if (!historic) {
+                table.row.add([
+                    '',                                                                                     // 0 - <button>
+                    message.id,                                                                             // 1 - MessageID_RefTierMessageID
+                    params.CompanyAlias,                                                                    // 2 - Client
+                    Array.isArray(params.CompanyMatchAttrib)                                                // 3 - Reason
+                        ? params.CompanyMatchAttrib.map(WTCFormat).join(' ')
+                        : WTCFormat(params.CompanyMatchAttrib),
+                    WTCFormat(params.RecordState) || 'Missing',                                             // 4 - Alert Status
+                    params.RefTierMessageID || 'Missing',                                                   // 5 - RefTierMessageID
+                    params.MessageID || 'Missing',                                                          // 6 - RefMessageID
+                    params.Symbol || 'Missing',                                                             // 7 - IOISymbol
+                    params.MessageID || 'Missing',                                                          // 8 - MessageID
+                    formatShares(params.IOIShares) || 'Missing',                                            // 9 - IOIShares
+                    WTCFormat(params.Side) || 'Missing',                                                    // 10- Opportunity
+                    lclCompletionTime || 'Missing',                                                         // 11- When
+                    utcCompletionDateTime || 'Missing',                                                     // 12- hidden datetime for ordering
+                    params.HoldingsRefAccountID || 'Missing',                                               // 13- HoldingsRefAccountID
+                    '<div class="badge-news fs-10 badge-tj-success"><span class="fw-bold">READ</span></div>'// 14- News
+                ]).node().id = 'row-' + message.id;
+                table.draw();
+            } else {
+                tableH.row.add([
+                    '',                                                                                     // 0 - <button>
+                    message.id,                                                                             // 1 - MessageID_RefTierMessageID
+                    params.CompanyAlias,                                                                    // 2 - Client
+                    Array.isArray(params.CompanyMatchAttrib)                                                // 3 - Reason
+                        ? params.CompanyMatchAttrib.map(WTCFormat).join(' ')
+                        : WTCFormat(params.CompanyMatchAttrib),
+                    WTCFormat(params.RecordState) || 'Missing',                                             // 4 - Alert Status
+                    params.RefTierMessageID || 'Missing',                                                   // 5 - RefTierMessageID
+                    params.MessageID || 'Missing',                                                          // 6 - RefMessageID
+                    params.Symbol || 'Missing',                                                             // 7 - IOISymbol
+                    params.MessageID || 'Missing',                                                          // 8 - MessageID
+                    formatShares(params.IOIShares) || 'Missing',                                            // 9 - IOIShares
+                    WTCFormat(params.Side) || 'Missing',                                                    // 10- Opportunity
+                    lclCompletionTime || 'Missing',                                                         // 11- When
+                    utcCompletionDateTime || 'Missing',                                                     // 12- hidden datetime for ordering
+                    params.HoldingsRefAccountID || 'Missing',                                               // 13- HoldingsRefAccountID
+                    '<div class="badge-news fs-10 badge-tj-success"><span class="fw-bold">READ</span></div>'// 14- News
+                ]).node().id = 'row-' + message.id;
+                tableH.draw();
             }
-            table.row.add([
-                '',                                                                                     // 0 - <button>
-                message.id,                                                                             // 1 - MessageID_RefTierMessageID
-                params.CompanyAlias,                                                                    // 2 - Client
-                Array.isArray(params.CompanyMatchAttrib)                                                // 3 - Reason
-                    ? params.CompanyMatchAttrib.map(WTCFormat).join(' ')
-                    : WTCFormat(params.CompanyMatchAttrib),
-                WTCFormat(params.RecordState) || 'Missing',                                             // 4 - Alert Status
-                params.RefTierMessageID || 'Missing',                                                   // 5 - RefTierMessageID
-                params.MessageID || 'Missing',                                                          // 6 - RefMessageID
-                params.Symbol || 'Missing',                                                             // 7 - IOISymbol
-                params.MessageID || 'Missing',                                                          // 8 - MessageID
-                formatShares(params.IOIShares) || 'Missing',                                            // 9 - IOIShares
-                WTCFormat(params.Side) || 'Missing',                                                    // 10- Opportunity
-                lclCompletionTime || 'Missing',                                                         // 11- When
-                lclCompletionDateTime || 'Missing',                                                     // 12- ?
-                params.HoldingsRefAccountID || 'Missing',                                               // 13- HoldingsRefAccountID
-                '<div class="badge-news fs-10 badge-tj-success"><span class="fw-bold">READ</span></div>'// 14- News
-            ]).node().id = 'row-' + message.id;
-            table.draw();
+
         }
 
-        function updateAlertMessage(message, params, row) {
+        function updateAlertMessage(message, params, lclCompletionTime, row) {
             console.log(`Updating Alert Row:` + message.id);
             //console.log(row.data());
-            let lclCompletionTime;
-            let lclCompletionDateTime;
-            if (params.completionTime !== undefined) {
-                const utcCompletionDateTime = fixDateTimeToJSDate(params.completionTime);
-                lclCompletionDateTime = new Date(utcCompletionDateTime);
-                lclCompletionTime = removeMilliseconds(getLclTime(new Date(lclCompletionDateTime)));
-            }
             let rowData = row.data();
             rowData[tableCols.STATUS] = WTCFormat(params.recordState) || 'Missing';
             rowData[tableCols.WHEN] = lclCompletionTime || 'Missing';
@@ -542,10 +611,9 @@ $(document).ready(
             , HOLDINGSDATA: 'HoldingsData'
         };
 
-        function addResponseDetails(id, params) {
+        function addResponseDetails(id, params, utcCompletionDateTime, lclCompletionTime, row) {
             let compositeKey = id;// || (params.MessageID + '_' + params.RefTierMessageID);
             console.log(`Updating row: ${compositeKey} MsgType: ${params.MsgType}`);
-            let row = table.row('#row-' + compositeKey);
             if (row.length) {
                 let tr = $(row.node());
                 let holdingsDetails = '';
@@ -554,29 +622,24 @@ $(document).ready(
                 let histDetails = '';
                 let alertIOIDetails = '';
 
-                // Redundant? Check later
-                // if (domain === 'ALERT') {
-                //     alertIOIDetails = getFormattedDetails(params, 'ALERT');
-                // }        
-
-                //Detaisl for IOI that generated the Alert
+                //Details for IOI that generated the Alert
                 if (params.MsgType === MsgType.ALERT) {
-                    alertIOIDetails = getFormattedDetails(params, AlertType.ALERTIOI);
+                    alertIOIDetails = getFormattedDetails(params, AlertType.ALERTIOI, utcCompletionDateTime, lclCompletionTime);
                 }
                 else if (params.MsgType === MsgType.IOI) {
                     //console.log('It did find domain = IOI');
-                    ioiDetails = getFormattedDetails(params, AlertType.IIOI);
+                    ioiDetails = getFormattedDetails(params, AlertType.IIOI, utcCompletionDateTime, lclCompletionTime);
                 }
                 // Details for INTRADAY Order & Historical Order
                 else if (params.MsgType === MsgType.FSMDCORDER || params.MsgType === MsgType.FSMINORDER) {
                     if (params.domain === 'order')
-                        orderDetails = getFormattedDetails(params, AlertType.INTRADAYORDER);
+                        orderDetails = getFormattedDetails(params, AlertType.INTRADAYORDER, utcCompletionDateTime, lclCompletionTime);
                     if (params.domain === 'history')
-                        histDetails = getFormattedDetails(params, AlertType.HISTORICALORDER);
+                        histDetails = getFormattedDetails(params, AlertType.HISTORICALORDER, utcCompletionDateTime, lclCompletionTime);
                 }
                 //Details for Holdings Data
                 else if (params.MsgType === MsgType.HOLDINGSDATA) {
-                    holdingsDetails = getFormattedDetails(params, AlertType.HOLDINGS);
+                    holdingsDetails = getFormattedDetails(params, AlertType.HOLDINGS, utcCompletionDateTime, lclCompletionTime);
                 }
                 else {
                     console.error(`Unhandled MsgType ${params.MsgType} for getFormattedDetails()`);
@@ -660,13 +723,7 @@ $(document).ready(
             return 'Missing';
         }
 
-        function getFormattedDetails(params, alertType) {
-            let lclCompletionTime;
-            if (params.CompletionTime !== undefined) {
-                const utcCompletionDateTime = fixDateTimeToJSDate(params.CompletionTime);
-                const lclCompletionDateTime = new Date(utcCompletionDateTime);
-                lclCompletionTime = removeMilliseconds(getLclTime(new Date(lclCompletionDateTime)));
-            }
+        function getFormattedDetails(params, alertType, utcCompletionDateTime, lclCompletionTime) {
             let formattedDetails = '';
             console.log(`DEBUG: MsgType ${alertType} was received.`);
             if (alertType === AlertType.ALERTIOI) {
@@ -1007,28 +1064,37 @@ $(document).ready(
         }
 
         function processResponseFromRaptor(message, params) {
-            // Removes the ALERTIOI before the row is created 
-            //if (message.id && message.id.toString().includes('_')) {
-            //    const parts = message.id.toString().split('_');
-            //    message.id = parts[0];
-            //}
             console.log(`Params Domain:${params.domain} DomainRef:${params.domainRef}`);
+
+            let historic = false;
+            let compositeKey = message.id;
+            const parts = compositeKey.split('_');
+            if (parts[2] === 'H') { // Response Ids from the Historical tab
+                historic = true;
+                compositeKey = `${parts[0]}_${parts[1]}`;
+            }
+            //console.log(`ROW ID:${compositeKey}`);
+            let utcCompletionDateTime = undefined;
+            let lclCompletionTime = undefined;
+            if (params.CompletionTime !== undefined) {
+                utcCompletionDateTime = fixDateTimeToJSDate(params.CompletionTime);
+                lclCompletionDateTime = new Date(utcCompletionDateTime);
+                if (lclCompletionDateTime < getLclToday()) // Initial messages wont have _H on the id, so check completion time
+                    historic = true;
+                lclCompletionTime = removeMilliseconds(historic ? getLclDateTime(new Date(lclCompletionDateTime)) : getLclTime(new Date(lclCompletionDateTime)));
+            }
+
+            let row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
             if (params.domain === 'alert' && params.domainRef === 'wtc') {
                 console.log(`WTC Alert`);
-                //if (params.RefTierMessageID===undefined) {
-                //let compositeKey = message.id;
-                //} else {
-                //    compositeKey = message.id + '_' + params.RefTierMessageID;
-                //}
                 if (message.code !== undefined && message.code === 204 && message.status === 'success') // NoContent
                 {
                     console.error(`Query yields no results:${message.message}`);
                     return;
                 }
                 if (params.recordState !== undefined && params.recordState === 'acknowledged') {
-                    let row = table.row('#row-' + message.id);
                     if (row.length) {
-                        updateAlertMessage(message, params, row);
+                        updateAlertMessage(message, params, lclCompletionTime, row);
                     } else {
                         console.error(`Update for non existent row ${row}`);
                     }
@@ -1038,13 +1104,13 @@ $(document).ready(
                     console.error(`NO MsgType!!:${message.message}`);
                     return;
                 }
-                let row = table.row('#row-' + message.id);
+
                 if (row.length) {
-                    addResponseDetails(message.id, params);
+                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
                 } else {
-                    addAlertMessage(message, params);
+                    addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime);
                     if (params.resend !== undefined && params.resend === 'no') {
-                        addResponseDetails(message.id, params);
+                        addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
                     }
                 }
             } else if (params.domain === 'alert') { // but response to a request, not a wtc gemerated alert
@@ -1064,9 +1130,11 @@ $(document).ready(
                     console.warn(`NO DATA:${message.message}`);
                     return;
                 }
-                let row = table.row('#row-' + message.id);
                 if (row.length) {
-                    addResponseDetails(message.id, params);
+                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                }
+                else {
+                    console.warn(`Cant find row ${compositeKey}`);
                 }
             } else if (params.domain === 'history') {
                 console.log(`History response`);
@@ -1074,9 +1142,11 @@ $(document).ready(
                     console.warn(`NO DATA:${message.message}`);
                     return;
                 }
-                let row = table.row('#row-' + message.id);
                 if (row.length) {
-                    addResponseDetails(message.id, params);
+                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                }
+                else {
+                    console.warn(`Cant find row ${compositeKey}`);
                 }
             } else if (params.domain === 'ioi') {
                 console.log(`IOI response`);
@@ -1084,9 +1154,11 @@ $(document).ready(
                     console.warn(`NO DATA:${message.message}`);
                     return;
                 }
-                let row = table.row('#row-' + message.id);
                 if (row.length) {
-                    addResponseDetails(message.id, params);
+                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                }
+                else {
+                    console.warn(`Cant find row ${compositeKey}`);
                 }
             } else if (params.domain === 'gui') {
                 console.log(`GUI response`);
@@ -1149,6 +1221,58 @@ $(document).ready(
             }
         }
 
+        $('#messagesTableHistoric tbody').on('click', 'td.details-control', function () {
+            let tr = $(this).closest('tr');
+            let row = tableH.row(tr);
+            let compositeKey = row.data()[tableCols.ID];
+            let reason = row.data()[tableCols.REASON];
+            let RecordState = row.data()[tableCols.STATUS];
+            let RefTierMessageID = row.data()[tableCols.REFTIERMESSAGEID];
+            let Symbol = row.data()[tableCols.IOISYMBOL];
+            let side = row.data()[tableCols.SIDE];
+            let holdingsID = row.data()[tableCols.HOLDINGSID];
+            console.log(`ROW:${row.data()}`);
+            let bRunLookups = false;
+            if (row.child.isShown()) {
+                if (!bRunLookups) {
+                    row.child.hide();
+                    tr.removeClass('shown');
+                }
+            }
+            else {
+                //User acknowledges the alert
+                //userAckAlert(compositeKey, RecordState);//, RefTierMessageID);
+
+                ///Retrieves the IOI that generated the Alert
+                //console.log(`Sending request for ALERTED IOI for ${compositeKey.split('_')[0]}`);
+                const postObj = new PostMessage(`${compositeKey}_H`, 'IOI');
+                SendMessage(postObj.retrieveMatchIoiById());
+
+                // Send out a bunch or requests based on the reason
+                // Options are 13F, I, H, O, IH for now
+                if (reason.includes('I-CROSS')) {
+                    const postObj = new PostMessage(`${compositeKey}_H`, 'IOI', side, Symbol);
+                    SendMessage(postObj.retrieveIntradayIOIDetail());
+                }
+                if (reason.includes('13F')) {
+                    const postObj = new PostMessage(`${compositeKey}_H`, 'HOLDINGS', side, Symbol, holdingsID);
+                    SendMessage(postObj.retrieveHoldingsDetail());
+                }
+                if (reason.includes('O-CROSS')) {
+                    const postObj = new PostMessage(`${compositeKey}_H`, 'FSMDCOrder', side, Symbol, holdingsID);
+                    SendMessage(postObj.retrieveOrderDetail());
+                }
+                if (reason.includes('O-HIST')) {
+                    const postObj = new PostMessage(`${compositeKey}_H`, 'HIST', side, Symbol);
+                    SendMessage(postObj.retrieveHistoryORderDetail());
+                }
+                if (reason.includes('I-HIST')) {
+                    const postObj = new PostMessage(`${compositeKey}_H`, 'HIST', side, Symbol);
+                    SendMessage(postObj.retrieveHistoryIOIDetail());
+                }
+            }
+        })
+
         // User clicked on blue arrow to drop down details of alert
         $('#messagesTable tbody').on('click', 'td.details-control', function () {
             let tr = $(this).closest('tr');
@@ -1206,7 +1330,7 @@ $(document).ready(
                 }
             }
             else {
-            //if (bRunLookups) {
+                //if (bRunLookups) {
                 //User acknowledges the alert
                 userAckAlert(compositeKey, RecordState);//, RefTierMessageID);
 
