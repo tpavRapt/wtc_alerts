@@ -1366,6 +1366,7 @@ $(document).ready(
 
         // Reason column
         $('#messagesTable tbody').on('click', '.badge-link', function () {
+            //console.log(`ACTION: REASON`);
             let tr = $(this).closest('tr');
             let row = table.row(tr);
             let rowClient = row.data()[tableCols.CLIENT];
@@ -1380,8 +1381,22 @@ $(document).ready(
 
         // News column
         $('#messagesTable tbody').on('click', '.badge-news', function () {
+            //console.log(`ACTION: NEWS`);
             let tr = $(this).closest('tr');
             let row = table.row(tr);
+            let rowClient = row.data()[tableCols.CLIENT];
+            let rowSymbol = row.data()[tableCols.IOISYMBOL];
+            let compositeKey = row.data()[tableCols.ID];
+
+            console.info(`Opening news ${rowClient} and ${rowSymbol} `);
+            const postObj = new PostMessage(compositeKey, null, null, rowSymbol, null);
+            SendMessage(postObj.loadFilteredNews());
+
+        });
+        $('#messagesTableHistoric tbody').on('click', '.badge-news', function () {
+            //console.log(`ACTION: NEWS`);
+            let tr = $(this).closest('tr');
+            let row = tableH.row(tr);
             let rowClient = row.data()[tableCols.CLIENT];
             let rowSymbol = row.data()[tableCols.IOISYMBOL];
             let compositeKey = row.data()[tableCols.ID];
