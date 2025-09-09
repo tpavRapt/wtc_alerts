@@ -540,20 +540,20 @@ $(document).ready(
                 table.row.add([
                     '',                                                                                     // 0 - <button>
                     message.id,                                                                             // 1 - MessageID_RefTierMessageID
-                    params.CompanyAlias,                                                                    // 2 - Client
-                    Array.isArray(params.CompanyMatchAttrib)                                                // 3 - Reason
-                        ? params.CompanyMatchAttrib.map(WTCFormat).join(' ')
-                        : WTCFormat(params.CompanyMatchAttrib),
-                    WTCFormat(params.RecordState) || 'Missing',                                             // 4 - Alert Status
-                    params.RefTierMessageID || 'Missing',                                                   // 5 - RefTierMessageID
-                    params.MessageID || 'Missing',                                                          // 6 - RefMessageID
-                    params.Symbol || 'Missing',                                                             // 7 - IOISymbol
-                    params.MessageID || 'Missing',                                                          // 8 - MessageID
-                    formatShares(params.IOIShares) || 'Missing',                                            // 9 - IOIShares
-                    WTCFormat(params.Side) || 'Missing',                                                    // 10- Opportunity
+                    params.companyalias,                                                                    // 2 - Client
+                    Array.isArray(params.companymatchattrib)                                                // 3 - Reason
+                        ? params.companymatchattrib.map(WTCFormat).join(' ')
+                        : WTCFormat(params.companymatchattrib),
+                    WTCFormat(params.recordstate) || 'Missing',                                             // 4 - Alert Status
+                    params.reftiermessageid || 'Missing',                                                   // 5 - RefTierMessageID
+                    params.messageid || 'Missing',                                                          // 6 - RefMessageID
+                    params.symbol || 'Missing',                                                             // 7 - IOISymbol
+                    params.messageid || 'Missing',                                                          // 8 - MessageID
+                    formatShares(params.ioishares) || 'Missing',                                            // 9 - IOIShares
+                    WTCFormat(params.side) || 'Missing',                                                    // 10- Opportunity
                     lclCompletionTime || 'Missing',                                                         // 11- When
                     utcCompletionDateTime || 'Missing',                                                     // 12- hidden datetime for ordering
-                    params.HoldingsRefAccountID || 'Missing',                                               // 13- HoldingsRefAccountID
+                    params.holdingsrefaccountid || 'Missing',                                               // 13- HoldingsRefAccountID
                     '<div class="badge-news fs-10 badge-tj-success"><span class="fw-bold">READ</span></div>'// 14- News
                 ]).node().id = 'row-' + message.id;
                 table.draw();
@@ -561,20 +561,20 @@ $(document).ready(
                 tableH.row.add([
                     '',                                                                                     // 0 - <button>
                     message.id,                                                                             // 1 - MessageID_RefTierMessageID
-                    params.CompanyAlias,                                                                    // 2 - Client
-                    Array.isArray(params.CompanyMatchAttrib)                                                // 3 - Reason
-                        ? params.CompanyMatchAttrib.map(WTCFormat).join(' ')
-                        : WTCFormat(params.CompanyMatchAttrib),
-                    WTCFormat(params.RecordState) || 'Missing',                                             // 4 - Alert Status
-                    params.RefTierMessageID || 'Missing',                                                   // 5 - RefTierMessageID
-                    params.MessageID || 'Missing',                                                          // 6 - RefMessageID
-                    params.Symbol || 'Missing',                                                             // 7 - IOISymbol
-                    params.MessageID || 'Missing',                                                          // 8 - MessageID
-                    formatShares(params.IOIShares) || 'Missing',                                            // 9 - IOIShares
-                    WTCFormat(params.Side) || 'Missing',                                                    // 10- Opportunity
+                    params.companyalias,                                                                    // 2 - Client
+                    Array.isArray(params.companymatchattrib)                                                // 3 - Reason
+                        ? params.companymatchattrib.map(WTCFormat).join(' ')
+                        : WTCFormat(params.companymatchattrib),
+                    WTCFormat(params.recordstate) || 'Missing',                                             // 4 - Alert Status
+                    params.reftiermessageid || 'Missing',                                                   // 5 - RefTierMessageID
+                    params.messageid || 'Missing',                                                          // 6 - RefMessageID
+                    params.symbol || 'Missing',                                                             // 7 - IOISymbol
+                    params.messageid || 'Missing',                                                          // 8 - MessageID
+                    formatShares(params.ioishares) || 'Missing',                                            // 9 - IOIShares
+                    WTCFormat(params.side) || 'Missing',                                                    // 10- Opportunity
                     lclCompletionTime || 'Missing',                                                         // 11- When
                     utcCompletionDateTime || 'Missing',                                                     // 12- hidden datetime for ordering
-                    params.HoldingsRefAccountID || 'Missing',                                               // 13- HoldingsRefAccountID
+                    params.holdingsrefaccountid || 'Missing',                                               // 13- HoldingsRefAccountID
                     '<div class="badge-news fs-10 badge-tj-success"><span class="fw-bold">READ</span></div>'// 14- News
                 ]).node().id = 'row-' + message.id;
                 tableH.draw();
@@ -586,7 +586,7 @@ $(document).ready(
             console.log(`Updating Alert Row:` + message.id);
             //console.log(row.data());
             let rowData = row.data();
-            rowData[tableCols.STATUS] = WTCFormat(params.recordState) || 'Missing';
+            rowData[tableCols.STATUS] = WTCFormat(params.recordstate) || 'Missing';
             rowData[tableCols.WHEN] = lclCompletionTime || 'Missing';
             row.data(rowData).draw(false);
         }
@@ -594,14 +594,6 @@ $(document).ready(
         let clientLogLevel = undefined;
         let clientVersion = undefined;
         let clientUser = undefined;
-
-        const AlertType = {
-            ALERTIOI: 'AlertIOI'
-            , IIOI: 'IIOI'
-            , INTRADAYORDER: 'IntradayOrder'
-            , HISTORICALORDER: 'HistoricalOrder'
-            , HOLDINGS: 'Holdings'
-        };
 
         const MsgType = {
             ALERT: 'Alert'
@@ -611,11 +603,27 @@ $(document).ready(
             , HOLDINGSDATA: 'HoldingsData'
         };
 
-        function addResponseDetails(id, params, utcCompletionDateTime, lclCompletionTime, row) {
-            let compositeKey = id;// || (params.MessageID + '_' + params.RefTierMessageID);
-            console.log(`Updating row: ${compositeKey} MsgType: ${params.MsgType}`);
-            if (row.length) {
+        function addNoDataDetails(compositeKey, params, row) {
+            if (params.domain === Domain.ALERT) {
+            } else if (params.domain === Domain.IOI) {
+            } else if (params.domain === Domain.ORDER) {
+            } else if (params.domain === Domain.HISTORY) {
+            } else if (params.domain === MsgType.HOLDINGSDATA) {
+            } else {
+                console.error(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
+            }
+            if (!row.child.isShown()) {
                 let tr = $(row.node());
+                let    childContent = `<tr><td>NO DATA</td></tr>`
+                row.child(childContent).show();
+                tr.addClass('shown');
+            }
+        }
+
+        function addResponseDetails(id, params, utcCompletionDateTime, lclCompletionTime, row) {
+            let compositeKey = id;// || (params.messageid + '_' + params.reftiermessageid);
+            if (row.length) {
+                console.log(`Updating row: ${compositeKey} MsgType: ${params.msgtype}`);
                 let holdingsDetails = '';
                 let ioiDetails = '';
                 let orderDetails = '';
@@ -623,29 +631,32 @@ $(document).ready(
                 let alertIOIDetails = '';
 
                 //Details for IOI that generated the Alert
-                if (params.MsgType === MsgType.ALERT) {
-                    alertIOIDetails = getFormattedDetails(params, AlertType.ALERTIOI, utcCompletionDateTime, lclCompletionTime);
+                if (params.msgtype === MsgType.ALERT) {
+                    alertIOIDetails = getFormattedDetails_ALERTIOI(params, utcCompletionDateTime, lclCompletionTime);
                 }
-                else if (params.MsgType === MsgType.IOI) {
+                else if (params.msgtype === MsgType.IOI) {
                     //console.log('It did find domain = IOI');
-                    ioiDetails = getFormattedDetails(params, AlertType.IIOI, utcCompletionDateTime, lclCompletionTime);
+                    ioiDetails = getFormattedDetails_IIOI(params, utcCompletionDateTime, lclCompletionTime);
                 }
                 // Details for INTRADAY Order & Historical Order
-                else if (params.MsgType === MsgType.FSMDCORDER || params.MsgType === MsgType.FSMINORDER) {
-                    if (params.domain === 'order')
-                        orderDetails = getFormattedDetails(params, AlertType.INTRADAYORDER, utcCompletionDateTime, lclCompletionTime);
-                    if (params.domain === 'history')
-                        histDetails = getFormattedDetails(params, AlertType.HISTORICALORDER, utcCompletionDateTime, lclCompletionTime);
+                else if (params.msgtype === MsgType.FSMDCORDER || params.msgtype === MsgType.FSMINORDER) {
+                    if (params.domain === Domain.ORDER)
+                        orderDetails = getFormattedDetails_INTRADAYORDER(params, utcCompletionDateTime, lclCompletionTime);
+                    else if (params.domain === Domain.HISTORY)
+                        histDetails = getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionTime);
+                    else
+                        console.warn(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
                 }
                 //Details for Holdings Data
-                else if (params.MsgType === MsgType.HOLDINGSDATA) {
-                    holdingsDetails = getFormattedDetails(params, AlertType.HOLDINGS, utcCompletionDateTime, lclCompletionTime);
+                else if (params.msgtype === MsgType.HOLDINGSDATA) {
+                    holdingsDetails = getFormattedDetails_HOLDINGS(params, utcCompletionDateTime, lclCompletionTime);
                 }
                 else {
-                    console.error(`Unhandled MsgType ${params.MsgType} for getFormattedDetails()`);
+                    console.warn(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
                 }
 
                 if (!row.child.isShown()) {
+                    let tr = $(row.node());
                     // Show drop down for row
                     let childContent = `
                             <tr>
@@ -656,32 +667,33 @@ $(document).ready(
                                 <td style="vertical-align: top;" id="holdings-${compositeKey}">${holdingsDetails}</td>
                             </tr>
                     `;
+                    if (alertIOIDetails === '' && orderDetails === '' && histDetails === '' && ioiDetails === '' && holdingsDetails === '')
+                        childContent = `<tr>NO DATA</tr>`
                     row.child(childContent).show();
                     tr.addClass('shown');
-
                 } else {
-                    if (params.MsgType === MsgType.IOI) { // IIOI
+                    if (params.msgtype === MsgType.IOI) { // IIOI
                         $(`#ioi-${compositeKey}`).html(ioiDetails);
                     }
-                    else if (params.MsgType === MsgType.FSMDCORDER || params.MsgType === MsgType.FSMINORDER) {
+                    else if (params.msgtype === MsgType.FSMDCORDER || params.msgtype === MsgType.FSMINORDER) {
                         // Only update the Order cell
-                        if (params.domain === 'order')
+                        if (params.domain === Domain.ORDER)
                             $(`#orders-${compositeKey}`).html(orderDetails); // INTRADAYORDER
-                        if (params.domain === 'history')
+                        if (params.domain === Domain.HISTORY)
                             $(`#hist-${compositeKey}`).html(histDetails);  // HISTORICALORDER
                     }
                     // If the row is already shown, update its content separately
-                    else if (params.MsgType === MsgType.HOLDINGSDATA) { // HOLDINGS
+                    else if (params.msgtype === MsgType.HOLDINGSDATA) { // HOLDINGS
                         // Only update the Holdings cell
                         $(`#holdings-${compositeKey}`).html(holdingsDetails);
                     }
-                    else if (params.MsgType == MsgType.ALERT) {
+                    else if (params.msgtype == MsgType.ALERT) {
                         ;
                     }
                     else {
-                        console.error(`Unhandled MsgType ${params.MsgType} for pageopen`);
+                        console.error(`Unhandled MsgType ${params.msgtype} for pageopen`);
                     }
-                    // if (params.MsgType === 'IOI') {
+                    // if (params.msgtype === 'IOI') {
                     //     $(`#alert-${compositeKey}`).html(alertIOIDetails);
                     // }
                 }
@@ -723,24 +735,21 @@ $(document).ready(
             return 'Missing';
         }
 
-        function getFormattedDetails(params, alertType, utcCompletionDateTime, lclCompletionTime) {
-            let formattedDetails = '';
-            console.log(`DEBUG: MsgType ${alertType} was received.`);
-            if (alertType === AlertType.ALERTIOI) {
-                console.log('DISPLAY: ALERTIOI');
-                const fields = ['Received IOI', 'Time', 'Symbol', 'Price', 'Side', 'IOIShares', 'User'];
-                const aArgs = ['AutoGenerated', 'OwnerMine'];
-                const selectedData = {
-                    'Received IOI': findCommonElement(params.IOIAttrib, aArgs),
-                    Time: lclCompletionTime || 'Missing',
-                    Symbol: params.Symbol + ` (${params.ExDestination})` || 'Missing',
-                    Price: (params.OrdType === 'Market') ? params.OrdType : formatPrice(params.RefOrderPrice) || 'Market',
-                    Side: fullSide(params.Side) || 'Missing',
-                    IOIShares: formatShares(params.IOIShares) || 'Missing',
-                    User: fistUserName(params.SourceLogonName) || 'Missing',
-                };
-                // Wrap in a styled div for the child row
-                formattedDetails = `
+        function getFormattedDetails_ALERTIOI(params, utcCompletionDateTime, lclCompletionTime) {
+            console.log('DISPLAY: ALERTIOI');
+            const fields = ['Received IOI', 'Time', 'Symbol', 'Price', 'Side', 'IOIShares', 'User'];
+            const aArgs = ['AutoGenerated', 'OwnerMine'];
+            const selectedData = {
+                'Received IOI': findCommonElement(params.ioiattrib, aArgs),
+                Time: lclCompletionTime || 'Missing',
+                Symbol: params.symbol + ` (${params.exdestination})` || 'Missing',
+                Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
+                Side: fullSide(params.side) || 'Missing',
+                IOIShares: formatShares(params.ioishares) || 'Missing',
+                User: fistUserName(params.sourcelogonname) || 'Missing',
+            };
+            // Wrap in a styled div for the child row
+            formattedDetails = `
                 <div style="
                     background: #181b20;
                     border: 2px solid orange;
@@ -778,27 +787,28 @@ $(document).ready(
                             <span style="font-weight: bold; color: #fff;">IOIShares:</span>
                             <span style="margin-left: 8px;">${selectedData['IOIShares']}</span>
                         </li>
-                        <li ">
+                        <li>
                             <span style="font-weight: bold; color: #fff;">User:</span>
                             <span style="margin-left: 8px;">${selectedData['User']}</span>
                         </li>
                     </ul>
                 </div>
                 `;
-            } else if (alertType === AlertType.IIOI) {
-                //            } else if (alertType === 'IOI' || alertType === AlertType.IIOI) {
-                console.log('DISPLAY: IIOI');
-                const fields = ['Type', 'Time', 'Symbol', 'Price', 'Side', 'IOIShares', 'User'];
-                const selectedData = {
-                    Type: 'Intraday IOI' || 'Missing',
-                    Time: lclCompletionTime || 'Missing',
-                    Symbol: params.Symbol + ` (${params.ExDestination})` || 'Missing',
-                    Price: (params.OrdType === 'Market') ? params.OrdType : formatPrice(params.RefOrderPrice) || 'Market',
-                    Side: fullSide(params.Side) || 'Missing',
-                    IOIShares: formatShares(params.IOIShares) || 'Missing',
-                    User: fistUserName(params.SourceLogonName) || 'Missing',
-                };
-                formattedDetails = `
+            return formattedDetails;
+        }
+        function getFormattedDetails_IIOI(params, utcCompletionDateTime, lclCompletionTime) {
+            console.log('DISPLAY: IIOI');
+            const fields = ['Type', 'Time', 'Symbol', 'Price', 'Side', 'IOIShares', 'User'];
+            const selectedData = {
+                Type: 'Intraday IOI' || 'Missing',
+                Time: lclCompletionTime || 'Missing',
+                Symbol: params.symbol + ` (${params.exdestination})` || 'Missing',
+                Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
+                Side: fullSide(params.side) || 'Missing',
+                IOIShares: formatShares(params.ioishares) || 'Missing',
+                User: fistUserName(params.sourcelogonname) || 'Missing',
+            };
+            formattedDetails = `
                 <div style="
                     background: #181b20;
                     border: 2px solid;
@@ -843,19 +853,21 @@ $(document).ready(
                     </ul>
                 </div>
                 `;
-            } else if (alertType === AlertType.INTRADAYORDER) {
-                console.log('DISPLAY: INTRADAYORDER');
-                const fields = ['Type', 'Time', 'Symbol', 'Qty (avai/exec)', 'Price', 'Side', 'User'];
-                const selectedData = {
-                    Type: 'Order',
-                    Time: lclCompletionTime || 'Missing',
-                    Symbol: params.Symbol + ` (${params.RAIExchangeID})` || 'Missing',
-                    Price: ((params.AvgPx === '0') ? formatPrice(params.AvgPx) : 'Market') || 'Missing',
-                    'Qty (avai/exec)': (formatShares(params.AvailQty) + ' / ' + formatShares(params.CumQty) + ' (' + calcPercentage(params.CumQty, params.AvailQty) + '%)') || 'Missing',
-                    Side: fullSide(params.Side) || 'Missing',
-                    User: fistUserName(params.SourceLogonName) || 'Missing'
-                };
-                formattedDetails = `
+            return formattedDetails;
+        }
+        function getFormattedDetails_INTRADAYORDER(params, utcCompletionDateTime, lclCompletionTime) {
+            console.log('DISPLAY: INTRADAYORDER');
+            const fields = ['Type', 'Time', 'Symbol', 'Qty (avai/exec)', 'Price', 'Side', 'User'];
+            const selectedData = {
+                Type: 'Order',
+                Time: lclCompletionTime || 'Missing',
+                Symbol: params.symbol + ` (${params.raiexchangeid})` || 'Missing',
+                Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
+                'Qty (avai/exec)': (formatShares(params.availqty) + ' / ' + formatShares(params.cumqty) + ' (' + calcPercentage(params.cumqty, params.availqty) + '%)') || 'Missing',
+                Side: fullSide(params.side) || 'Missing',
+                User: fistUserName(params.sourcelogonname) || 'Missing'
+            };
+            formattedDetails = `
                 <div style="
                     background: #181b20;
                     border: 2px solid;
@@ -899,19 +911,21 @@ $(document).ready(
                     </ul>
                 </div>
                 `;
-            } else if (alertType === AlertType.HISTORICALORDER) {
-                console.log('DISPLAY: HISTORICALORDER');
-                const fields = ['Type', 'Time', 'Symbol', 'Qty (avai/exec)', 'Price', 'Side', 'User'];
-                const selectedData = {
-                    Type: 'Historical Order' + ` (${params.MsgType})`,
-                    Time: lclCompletionTime || 'Missing',
-                    Symbol: params.Symbol + ` (${params.RAIExchangeID})` || 'Missing',
-                    Price: ((params.AvgPx === '0') ? formatPrice(params.AvgPx) : 'Market') || 'Missing',
-                    'Qty (avai/exec)': (formatShares(params.OrderQty) + ' / ' + formatShares(params.CumQty) + ' (' + calcPercentage(params.CumQty, params.OrderQty) + '%)') || 'Missing',
-                    Side: fullSide(params.Side) || 'Missing',
-                    User: fistUserName(params.SourceLogonName) || 'Missing'
-                };
-                formattedDetails = `
+            return formattedDetails;
+        }
+        function getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionTime) {
+            console.log('DISPLAY: HISTORICALORDER');
+            const fields = ['Type', 'Time', 'Symbol', 'Qty (avai/exec)', 'Price', 'Side', 'User'];
+            const selectedData = {
+                Type: 'Historical Order' + ` (${params.msgtype})`,
+                Time: lclCompletionTime || 'Missing',
+                Symbol: params.symbol + ` (${params.raiexchangeid})` || 'Missing',
+                Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
+                'Qty (avai/exec)': (formatShares(params.orderqty) + ' / ' + formatShares(params.cumqty) + ' (' + calcPercentage(params.cumqty, params.orderqty) + '%)') || 'Missing',
+                Side: fullSide(params.side) || 'Missing',
+                User: fistUserName(params.sourcelogonname) || 'Missing'
+            };
+            formattedDetails = `
                 <div style="
                     background: #181b20;
                     border: 2px solid ;
@@ -956,21 +970,23 @@ $(document).ready(
                     </ul>
                 </div>
                 `;
-            } else if (alertType === AlertType.HOLDINGS) {
-                console.log('DISPLAY: HOLDINGS');
-                const fields = ['Type', 'Symbol', 'Exchange', 'Account', 'Shares Held', '% held', 'Delta Shares', 'Filing Date'];
-                const selectedData = {
-                    Type: params.MsgType || 'Missing',
-                    Symbol: params.Symbol || 'Missing',
-                    Exchange: params.Exchange || 'Missing',
-                    Account: params.HoldingsAccount || 'Missing',
-                    'Shares Held': formatNumber(params.HoldingsSharesHeld) || 'Missing',
-                    '% held': numberToPercentage(params.HoldingsPercentHeld) || 'Missing',
-                    'Delta Shares': formatShares(params.HoldingsSharesDelta) + sideTendency(params.HoldingsSharesDelta) || 'Missing',
-                    'Filing Date': params.HoldingsDate || 'Missing'
-                };
+            return formattedDetails;
+        }
+        function getFormattedDetails_HOLDINGS(params, utcCompletionDateTime, lclCompletionTime) {
+            console.log('DISPLAY: HOLDINGS');
+            const fields = ['Type', 'Symbol', 'Exchange', 'Account', 'Shares Held', '% held', 'Delta Shares', 'Filing Date'];
+            const selectedData = {
+                Type: params.msgtype || 'Missing',
+                Symbol: params.symbol || 'Missing',
+                Exchange: params.exchange || 'Missing',
+                Account: params.holdingsaccount || 'Missing',
+                'Shares Held': formatNumber(params.holdingssharesheld) || 'Missing',
+                '% held': numberToPercentage(params.holdingspercentheld) || 'Missing',
+                'Delta Shares': formatShares(params.holdingssharesdelta) + sideTendency(params.holdingssharesdelta) || 'Missing',
+                'Filing Date': params.holdingsdate || 'Missing'
+            };
 
-                formattedDetails = `
+            formattedDetails = `
                 <div style="
                     background: #181b20;
                     border: 2px solid ;
@@ -1019,9 +1035,6 @@ $(document).ready(
                     </ul>
                 </div>
                 `;
-            } else {
-                console.log(`ERROR: ALERTTYPE ${alertType} is not recognized.`);
-            }
             return formattedDetails;
         }
 
@@ -1063,6 +1076,20 @@ $(document).ready(
             }
         }
 
+        const Domain = {
+            ALERT: 'alert'
+            , ORDER: 'order'
+            , IOI: 'ioi'
+            , HISTORY: 'history'
+            , HOLDINGS: 'Holdings'
+            , GUI: 'gui'
+            , SYSTEM: 'system'
+        };
+        const DomainRef = {
+            WTC: 'wtc'
+            , VERSION: 'version'
+        };
+
         function processResponseFromRaptor(message, params) {
             console.log(`Params Domain:${params.domain} DomainRef:${params.domainRef}`);
 
@@ -1076,8 +1103,8 @@ $(document).ready(
             //console.log(`ROW ID:${compositeKey}`);
             let utcCompletionDateTime = undefined;
             let lclCompletionTime = undefined;
-            if (params.CompletionTime !== undefined) {
-                utcCompletionDateTime = fixDateTimeToJSDate(params.CompletionTime);
+            if (params.completiontime !== undefined) {
+                utcCompletionDateTime = fixDateTimeToJSDate(params.completiontime);
                 lclCompletionDateTime = new Date(utcCompletionDateTime);
                 if (lclCompletionDateTime < getLclToday()) // Initial messages wont have _H on the id, so check completion time
                     historic = true;
@@ -1085,22 +1112,24 @@ $(document).ready(
             }
 
             let row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
-            if (params.domain === 'alert' && params.domainRef === 'wtc') {
+            if (params.domain === Domain.ALERT && params.domainRef === DomainRef.WTC) {
                 console.log(`WTC Alert`);
                 if (message.code !== undefined && message.code === 204 && message.status === 'success') // NoContent
                 {
                     console.error(`Query yields no results:${message.message}`);
                     return;
                 }
-                if (params.recordState !== undefined && params.recordState === 'acknowledged') {
+                if (params.recordstate !== undefined && params.recordstate === 'acknowledged') {
                     if (row.length) {
                         updateAlertMessage(message, params, lclCompletionTime, row);
+                    } else if (params.resend !== undefined && params.resend === 'yes') {
+                        addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime);
                     } else {
                         console.error(`Update for non existent row ${row}`);
                     }
                     return;
                 }
-                if (params.MsgType === undefined) {
+                if (params.msgtype === undefined) {
                     console.error(`NO MsgType!!:${message.message}`);
                     return;
                 }
@@ -1110,57 +1139,46 @@ $(document).ready(
                 } else {
                     addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime);
                     if (params.resend !== undefined && params.resend === 'no') {
+                        row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
                         addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
                     }
                 }
-            } else if (params.domain === 'alert') { // but response to a request, not a wtc gemerated alert
+            } else if (params.domain === Domain.ALERT) { // but response to a request, not a wtc gemerated alert
                 console.log(`Alert response`);
-            } else if (params.domain === 'system') {
+            } else if (params.domain === Domain.SYSTEM) {
                 console.log(`System response`);
-                if (params.domainRef === 'version') {
+                if (params.domainRef === DomainRef.VERSION) {
                     document.title = `Quick Who-To-Call v${params.version} Usr:${params.name} | O-HIST = Historical Order | 13F = Holdings Data | I-CROSS = Intraday IOIs  | O-CROSS = Intraday Order`
-                    if (params.qaLogging !== undefined && params.qaLogging === "yes")
+                    if (params.qalogging !== undefined && params.qalogging === "yes")
                         qaLogging = true;
                     else
                         qaLogging = false;
                 }
-            } else if (params.domain === 'order') {
+            } else if (params.domain === Domain.ORDER) {
                 console.log(`Order response`);
-                if (params.MsgType === undefined) {
+                if (params.msgtype === undefined) {
                     console.warn(`NO DATA:${message.message}`);
+                    addNoDataDetails(compositeKey, params, row);
                     return;
                 }
-                if (row.length) {
-                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
-                }
-                else {
-                    console.warn(`Cant find row ${compositeKey}`);
-                }
-            } else if (params.domain === 'history') {
+                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+            } else if (params.domain === Domain.HISTORY) {
                 console.log(`History response`);
-                if (params.MsgType === undefined) {
+                if (params.msgtype === undefined) {
                     console.warn(`NO DATA:${message.message}`);
+                    addNoDataDetails(compositeKey, params, row);
                     return;
                 }
-                if (row.length) {
-                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
-                }
-                else {
-                    console.warn(`Cant find row ${compositeKey}`);
-                }
-            } else if (params.domain === 'ioi') {
+                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+            } else if (params.domain === Domain.IOI) {
                 console.log(`IOI response`);
-                if (params.MsgType === undefined) {
+                if (params.msgtype === undefined) {
                     console.warn(`NO DATA:${message.message}`);
+                    addNoDataDetails(compositeKey, params, row);
                     return;
                 }
-                if (row.length) {
-                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
-                }
-                else {
-                    console.warn(`Cant find row ${compositeKey}`);
-                }
-            } else if (params.domain === 'gui') {
+                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+            } else if (params.domain === Domain.GUI) {
                 console.log(`GUI response`);
             } else {
                 console.error(`Domain not handled:` + params.domain);
@@ -1207,8 +1225,8 @@ $(document).ready(
             const _params = {
                 domain: 'alert',
                 domainRef: 'wtc',
-                refMessageId: parts[0],
-                refTierMessageID: parts[1]
+                refmessageid: parts[0],
+                reftiermessageid: parts[1]
                 //messageId: compositeKey.split('_')[0],
                 //RefTierMessageID: RefTierMessageID
             };
@@ -1345,10 +1363,10 @@ $(document).ready(
                     const postObj = new PostMessage(compositeKey, 'IOI', side, Symbol);
                     SendMessage(postObj.retrieveIntradayIOIDetail());
                 }
-                if (reason.includes('13F')) {
-                    const postObj = new PostMessage(compositeKey, 'HOLDINGS', side, Symbol, holdingsID);
-                    SendMessage(postObj.retrieveHoldingsDetail());
-                }
+                //                if (reason.includes('13F')) {
+                //                    const postObj = new PostMessage(compositeKey, 'HOLDINGS', side, Symbol, holdingsID);
+                //                    SendMessage(postObj.retrieveHoldingsDetail());
+                //                }
                 if (reason.includes('O-CROSS')) {
                     const postObj = new PostMessage(compositeKey, 'FSMDCOrder', side, Symbol, holdingsID);
                     SendMessage(postObj.retrieveOrderDetail());

@@ -42,9 +42,9 @@ class PostMessage {
             domain: 'alert',
             domainRef: 'ioi',
             id:'HotIOIs',
-            AlertBehavior:`RaptorDesktop`,
-            StoredProcType:`IOI`,
-            Query:`Status & Normal <> 0`
+            alertbehavior:`RaptorDesktop`,
+            storedproctype:`IOI`,
+            query:`Status & Normal <> 0`
         };
         const message = AddRequiredRequestKeys(undefined, 'POST', params);
         return message;
