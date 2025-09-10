@@ -1,71 +1,3 @@
-var qaLogging = false;
-//// define a new console
-//var console=(function(oldCons){
-//    return {
-//        log: function(text){
-//            oldCons.log(text);
-//            if (qaLogging) {
-//                const _params = {
-//                domain: 'log',
-//                logLevel: 'info',
-//                data: text
-//                };
-//                const message = AddRequiredRequestKeys(undefined, 'POST', _params);
-//                SendMessage(message);
-//            }
-//        },
-//        info: function (text) {
-//            oldCons.info(text);
-//            if (qaLogging) {
-//                const _params = {
-//                domain: 'log',
-//                logLevel: 'info',
-//                data: text
-//                };
-//                const message = AddRequiredRequestKeys(undefined, 'POST', _params);
-//                SendMessage(message);
-//            }
-//        },
-//        warn: function (text) {
-//            oldCons.warn(text);
-//            if (qaLogging) {
-//                const _params = {
-//                domain: 'log',
-//                logLevel: 'warning',
-//                data: text
-//                };
-//                const message = AddRequiredRequestKeys(undefined, 'POST', _params);
-//                SendMessage(message);
-//            }
-//        },
-//        error: function (text) {
-//            oldCons.error(text);
-//            if (qaLogging) {
-//                const _params = {
-//                domain: 'log',
-//                logLevel: 'error',
-//                data: text
-//                };
-//                const message = AddRequiredRequestKeys(undefined, 'POST', _params);
-//                SendMessage(message);
-//            }
-//        },
-//        debug: function (text) {
-//            oldCons.debug(text);
-//            if (qaLogging) {
-//                const _params = {
-//                domain: 'log',
-//                logLevel: 'debug',
-//                data: text
-//                };
-//                const message = AddRequiredRequestKeys(undefined, 'POST', _params);
-//                SendMessage(message);
-//            }
-//        }
-//    };
-//}(window.console));
-//window.console = console;
-
 // Initialize LokiJS database and collection for messages
 var db = new loki('messages.db');
 var messagesCollection = db.addCollection('messages');
@@ -74,98 +6,6 @@ var messagesCollection = db.addCollection('messages');
 const WTC_DB_NAME = 'WTCAlertsDB';
 const WTC_STORE_NAME = 'messages';
 let indexedDb;
-
-function AddRequiredResponseKeys(_id, _status, _message, _params) {
-    if (_id === undefined || _id === null) {
-        _id = getRequestID();
-    }
-    if (_message !== undefined && _message !== null) {
-        return {
-            id: _id,
-            timestamp: getCurrentTimestamp(),
-            status: _status,
-            message: _message,
-            params: _params
-        };
-    } else {
-        return {
-            id: _id,
-            timestamp: getCurrentTimestamp(),
-            status: _status,
-            params: _params
-        };
-    };
-}
-
-function getLclToday() // Todays local date at midnight
-{
-    let date = new Date();
-    date.setHours(0, 0, 0, 0);
-    return date;
-}
-
-function getLclDateTime(now = new Date()) {
-    return String(now.getFullYear()).padStart(4, '0') + '-' +
-        String(now.getMonth()).padStart(2, '0') + '-' +
-        String(now.getDay()).padStart(2, '0') + ' ' +
-        String(now.getHours()).padStart(2, '0') + ':' +
-        String(now.getMinutes()).padStart(2, '0') + ':' +
-        String(now.getSeconds()).padStart(2, '0') + '.' +
-        String(now.getMilliseconds()).padStart(3, '0');
-}
-
-function getLclTime(now = new Date()) {
-    return String(now.getHours()).padStart(2, '0') + ':' +
-        String(now.getMinutes()).padStart(2, '0') + ':' +
-        String(now.getSeconds()).padStart(2, '0') + '.' +
-        String(now.getMilliseconds()).padStart(3, '0');
-}
-
-// Global fn to get FIX format timestamp
-// Format 20250812-14:11:28.530
-function getCurrentTimestamp() {
-    const now = new Date();
-    return now.getUTCFullYear().toString() +
-        String(now.getUTCMonth() + 1).padStart(2, '0') +
-        String(now.getUTCDate()).padStart(2, '0') + '-' +
-        String(now.getUTCHours()).padStart(2, '0') + ':' +
-        String(now.getUTCMinutes()).padStart(2, '0') + ':' +
-        String(now.getUTCSeconds()).padStart(2, '0') + '.' +
-        String(now.getUTCMilliseconds()).padStart(3, '0');
-}
-
-// Format 20250812-14:11:28.530
-// Result 2025-08-12T14:11:28.530Z
-function fixDateTimeToJSDate(fixDateTimeString) {
-    // Example: "20231027-14:30:45.123"
-    const year = fixDateTimeString.substring(0, 4);
-    const month = fixDateTimeString.substring(4, 6); // Month is 0-indexed in Date constructor
-    const day = fixDateTimeString.substring(6, 8);
-    const timePart = fixDateTimeString.substring(9); // "HH:MM:SS.sss"
-
-    // Reformat to ISO 8601 compatible string (e.g., "2023-10-27T14:30:45.123Z" for UTC)
-    // Assuming the FIX time is UTC, append 'Z' for Zulu time (UTC)
-    const isoString = `${year}-${month}-${day}T${timePart}Z`;
-    return isoString;
-}
-
-const rgbToObj = (rgbStr) => {
-    const matches = rgbStr.match(/\d+/g); // string array of matches on numbers
-    const numbers = matches.map(Number); // numeric array
-    return { r: numbers[0], g: numbers[1], b: numbers[2] }; // create color object
-}
-
-function areColorsEqual(color1, color2) {
-    //console.log(`${color1.r} = ${color2.r}`);
-    //console.log(`${color1.g} = ${color2.g}`);
-    //console.log(`${color1.b} = ${color2.b}`);
-    return color1.r === color2.r && color1.g === color2.g && color1.b === color2.b;
-}
-
-function SendMessage(message) {
-    console.info(`[${getLclTime()}] Snd: ${JSON.stringify(message)}`);
-    window.chrome.webview.postMessage(JSON.stringify(message));
-}
 
 function initializeApp() {
     console.log("Page and all resources fully loaded");
@@ -217,12 +57,8 @@ function getIndexedDbMessage(messageId) {
     });
 }
 
-let requestCounter = 0;  // Counter for tracking requests
-function getRequestID() {
-    requestCounter++;
-    return `req_${Date.now()}_${requestCounter}`;
-}
-
+let clientVersion = undefined;
+let clientUser = undefined;
 
 function ValidateRequestFromRaptor(message) {
     if (message.id === undefined) {
@@ -314,6 +150,8 @@ $(document).ready(
 
         let table = $('#messagesTable').DataTable({
             responsive: true,
+            //scrollY: '600px',
+            scrollCollapse: true,
             columnDefs: [
                 {
                     className: 'details-control',
@@ -348,6 +186,10 @@ $(document).ready(
                 },
                 {
                     targets: tableCols.UTCDATETIME,
+                    visible: debugTable
+                },
+                {
+                    targets: tableCols.HOLDINGSID,
                     visible: debugTable
                 }
             ],
@@ -390,6 +232,10 @@ $(document).ready(
                 },
                 {
                     targets: tableCols.UTCDATETIME,
+                    visible: debugTable
+                },
+                {
+                    targets: tableCols.HOLDINGSID,
                     visible: debugTable
                 }
             ],
@@ -591,10 +437,6 @@ $(document).ready(
             row.data(rowData).draw(false);
         }
 
-        let clientLogLevel = undefined;
-        let clientVersion = undefined;
-        let clientUser = undefined;
-
         const MsgType = {
             ALERT: 'Alert'
             , IOI: 'IOI'
@@ -613,8 +455,9 @@ $(document).ready(
                 console.error(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
             }
             if (!row.child.isShown()) {
+                console.log("SHOW");
                 let tr = $(row.node());
-                let    childContent = `<tr><td>NO DATA</td></tr>`
+                let childContent = `<tr><td>NO DATA</td></tr>`
                 row.child(childContent).show();
                 tr.addClass('shown');
             }
@@ -656,6 +499,10 @@ $(document).ready(
                 }
 
                 if (!row.child.isShown()) {
+                    console.log("SHOW");
+                    //var curScrollTop = $(window).scrollTop();
+                    //$('html').toggleClass('noscroll').css('top', '-' + curScrollTop + 'px');
+
                     let tr = $(row.node());
                     // Show drop down for row
                     let childContent = `
@@ -671,7 +518,9 @@ $(document).ready(
                         childContent = `<tr>NO DATA</tr>`
                     row.child(childContent).show();
                     tr.addClass('shown');
+                    //$('html').toggleClass('noscroll');
                 } else {
+                    console.log("UPDATE CHILD DATA");
                     if (params.msgtype === MsgType.IOI) { // IIOI
                         $(`#ioi-${compositeKey}`).html(ioiDetails);
                     }
@@ -736,7 +585,7 @@ $(document).ready(
         }
 
         function getFormattedDetails_ALERTIOI(params, utcCompletionDateTime, lclCompletionTime) {
-            console.log('DISPLAY: ALERTIOI');
+            console.log('LAYOUT: ALERTIOI');
             const fields = ['Received IOI', 'Time', 'Symbol', 'Price', 'Side', 'IOIShares', 'User'];
             const aArgs = ['AutoGenerated', 'OwnerMine'];
             const selectedData = {
@@ -797,7 +646,7 @@ $(document).ready(
             return formattedDetails;
         }
         function getFormattedDetails_IIOI(params, utcCompletionDateTime, lclCompletionTime) {
-            console.log('DISPLAY: IIOI');
+            console.log('LAYOUT: IIOI');
             const fields = ['Type', 'Time', 'Symbol', 'Price', 'Side', 'IOIShares', 'User'];
             const selectedData = {
                 Type: 'Intraday IOI' || 'Missing',
@@ -856,7 +705,7 @@ $(document).ready(
             return formattedDetails;
         }
         function getFormattedDetails_INTRADAYORDER(params, utcCompletionDateTime, lclCompletionTime) {
-            console.log('DISPLAY: INTRADAYORDER');
+            console.log('LAYOUT: INTRADAYORDER');
             const fields = ['Type', 'Time', 'Symbol', 'Qty (avai/exec)', 'Price', 'Side', 'User'];
             const selectedData = {
                 Type: 'Order',
@@ -914,7 +763,7 @@ $(document).ready(
             return formattedDetails;
         }
         function getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionTime) {
-            console.log('DISPLAY: HISTORICALORDER');
+            console.log('LAYOUT: HISTORICALORDER');
             const fields = ['Type', 'Time', 'Symbol', 'Qty (avai/exec)', 'Price', 'Side', 'User'];
             const selectedData = {
                 Type: 'Historical Order' + ` (${params.msgtype})`,
@@ -973,7 +822,7 @@ $(document).ready(
             return formattedDetails;
         }
         function getFormattedDetails_HOLDINGS(params, utcCompletionDateTime, lclCompletionTime) {
-            console.log('DISPLAY: HOLDINGS');
+            console.log('LAYOUT: HOLDINGS');
             const fields = ['Type', 'Symbol', 'Exchange', 'Account', 'Shares Held', '% held', 'Delta Shares', 'Filing Date'];
             const selectedData = {
                 Type: params.msgtype || 'Missing',
@@ -1076,19 +925,6 @@ $(document).ready(
             }
         }
 
-        const Domain = {
-            ALERT: 'alert'
-            , ORDER: 'order'
-            , IOI: 'ioi'
-            , HISTORY: 'history'
-            , HOLDINGS: 'Holdings'
-            , GUI: 'gui'
-            , SYSTEM: 'system'
-        };
-        const DomainRef = {
-            WTC: 'wtc'
-            , VERSION: 'version'
-        };
 
         function processResponseFromRaptor(message, params) {
             console.log(`Params Domain:${params.domain} DomainRef:${params.domainRef}`);
@@ -1153,6 +989,17 @@ $(document).ready(
                         qaLogging = true;
                     else
                         qaLogging = false;
+
+                    if (params.loglevel == 'debug')
+                        clientLogLevel = LogLevel.DEBUG;
+                    else if (params.loglevel == 'error')
+                        clientLogLevel = LogLevel.ERROR;
+                    else if (params.loglevel == 'warning')
+                        clientLogLevel = LogLevel.WARNING;
+                    else if (params.loglevel == 'info')
+                        clientLogLevel = LogLevel.INFO;
+                    else
+                        clientLogLevel = LogLevel.NONE;   
                 }
             } else if (params.domain === Domain.ORDER) {
                 console.log(`Order response`);
@@ -1250,12 +1097,10 @@ $(document).ready(
             let side = row.data()[tableCols.SIDE];
             let holdingsID = row.data()[tableCols.HOLDINGSID];
             console.log(`ROW:${row.data()}`);
-            let bRunLookups = false;
             if (row.child.isShown()) {
-                if (!bRunLookups) {
-                    row.child.hide();
-                    tr.removeClass('shown');
-                }
+                console.log("HIDE");                
+                row.child.hide();
+                tr.removeClass('shown');
             }
             else {
                 //User acknowledges the alert
@@ -1343,8 +1188,14 @@ $(document).ready(
                 //    console.log(`No child!`);
                 //}
                 if (!bRunLookups) {
+                    console.log("HIDE");
+                    //var curScrollTop = $(window).scrollTop();
+                    //$('html').toggleClass('noscroll').css('top', '-' + curScrollTop + 'px');
+
                     row.child.hide();
                     tr.removeClass('shown');
+
+                    //$('html').toggleClass('noscroll');
                 }
             }
             else {
@@ -1363,10 +1214,10 @@ $(document).ready(
                     const postObj = new PostMessage(compositeKey, 'IOI', side, Symbol);
                     SendMessage(postObj.retrieveIntradayIOIDetail());
                 }
-                //                if (reason.includes('13F')) {
-                //                    const postObj = new PostMessage(compositeKey, 'HOLDINGS', side, Symbol, holdingsID);
-                //                    SendMessage(postObj.retrieveHoldingsDetail());
-                //                }
+                if (reason.includes('13F')) {
+                    const postObj = new PostMessage(compositeKey, 'HOLDINGS', side, Symbol, holdingsID);
+                    SendMessage(postObj.retrieveHoldingsDetail());
+                }
                 if (reason.includes('O-CROSS')) {
                     const postObj = new PostMessage(compositeKey, 'FSMDCOrder', side, Symbol, holdingsID);
                     SendMessage(postObj.retrieveOrderDetail());

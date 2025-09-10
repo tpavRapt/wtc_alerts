@@ -189,3 +189,12 @@ table.dataTable tbody td .label {
     margin-bottom: 20px; /* Space between controls and the table */
 }
 
+html.noscroll {
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+        height: 100%;
+        overflow-y: scroll !important; /* Keep scrollbar if content overflows fixed area */
+        z-index: 10;
+    }

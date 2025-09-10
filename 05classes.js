@@ -1,14 +1,4 @@
-function AddRequiredRequestKeys(_id, _method, _params) { // Add required fields
-    if (_id === undefined || _id === null) { 
-        _id = getRequestID();
-    }
-    return {
-        id: _id,
-        timestamp: getCurrentTimestamp(),
-        method: _method,
-        params: _params
-    };
-}
+
 
 class PostMessage {
     constructor(compositeKey = null, type = null, side = null, Symbol = null, holdingsID = null) {
