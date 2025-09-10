@@ -18,23 +18,23 @@ class PostMessage {
         return message;
     }
 
-    listAlerts(){
+    getPrefs(){
         const params = {
-            domain: 'alert',
-            domainRef: 'all',
+            domain: 'gui',
+            domainRef: 'preferences',
         };
         const message = AddRequiredRequestKeys(undefined, 'GET', params);
         return message;
     }
 
-    initAlerts(){
+    setAlert(alertQuery){
         const params = {
             domain: 'alert',
             domainRef: 'ioi',
             id:'HotIOIs',
             alertbehavior:`RaptorDesktop`,
             storedproctype:`IOI`,
-            query:`Status & Normal <> 0`
+            query:alertQuery
         };
         const message = AddRequiredRequestKeys(undefined, 'POST', params);
         return message;

@@ -7,14 +7,13 @@ const WTC_DB_NAME = 'WTCAlertsDB';
 const WTC_STORE_NAME = 'messages';
 let indexedDb;
 
+let initialized;
 function initializeApp() {
     console.log("Page and all resources fully loaded");
     const postObj = new PostMessage(null, null, null, null, null);
     SendMessage(postObj.initRequest());
-
-    SendMessage(postObj.listAlerts());
-
-    SendMessage(postObj.initAlerts());
+    initialized = false;
+    SendMessage(postObj.getPrefs());
 }
 
 // Open IndexedDB and create object store if needed
@@ -464,7 +463,7 @@ $(document).ready(
         //    }
         }
 
-        function addResponseDetails(id, params, utcCompletionDateTime, lclCompletionTime, row) {
+        function addResponseDetails(id, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row) {
             let compositeKey = id;// || (params.messageid + '_' + params.reftiermessageid);
             if (row.length) {
                 console.log(`Updating row: ${compositeKey} MsgType: ${params.msgtype}`);
@@ -487,7 +486,7 @@ $(document).ready(
                     if (params.domain === Domain.ORDER)
                         orderDetails = getFormattedDetails_INTRADAYORDER(params, utcCompletionDateTime, lclCompletionTime);
                     else if (params.domain === Domain.HISTORY)
-                        histDetails = getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionTime);
+                        histDetails = getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
                     else
                         console.warn(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
                 }
@@ -763,12 +762,12 @@ $(document).ready(
                 `;
             return formattedDetails;
         }
-        function getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionTime) {
+        function getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime) {
             console.log('LAYOUT: HISTORICALORDER');
             const fields = ['Type', 'Time', 'Symbol', 'Qty (avai/exec)', 'Price', 'Side', 'User'];
             const selectedData = {
                 Type: 'Historical Order' + ` (${params.msgtype})`,
-                Time: lclCompletionTime || 'Missing',
+                Time: removeMilliseconds(lclCompletionDateTime) || 'Missing',
                 Symbol: params.symbol + ` (${params.raiexchangeid})` || 'Missing',
                 Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
                 'Qty (avai/exec)': (formatShares(params.orderqty) + ' / ' + formatShares(params.cumqty) + ' (' + calcPercentage(params.cumqty, params.orderqty) + '%)') || 'Missing',
@@ -942,12 +941,13 @@ $(document).ready(
             let lclCompletionTime = undefined;
             if (params.completiontime !== undefined) {
                 utcCompletionDateTime = fixDateTimeToJSDate(params.completiontime);
-                lclCompletionDateTime = new Date(utcCompletionDateTime);
-                if (params.resend !== undefined && params.resend === 'yes' && lclCompletionDateTime < getLclToday()) // Only check completionTime for resends due to historic lookups
+                lclCompletionDateTime = getLclDateTime(new Date(utcCompletionDateTime));
+                console.log(`CHECK: ${new Date(utcCompletionDateTime)} < ${getLclToday()} ? ${new Date(utcCompletionDateTime) < getLclToday()}`);
+                if (params.resend !== undefined && params.resend === 'yes' && new Date(utcCompletionDateTime) < getLclToday()) // Only check completionTime for resends due to historic lookups
                     historic = true;
-                lclCompletionTime = removeMilliseconds(historic ? getLclDateTime(new Date(lclCompletionDateTime)) : getLclTime(new Date(lclCompletionDateTime)));
+                lclCompletionTime = removeMilliseconds(historic ? getLclDateTime(new Date(utcCompletionDateTime)) : getLclTime(new Date(utcCompletionDateTime)));
             }
-            console.log(`Historic:${historic}`);
+            //console.log(`Historic:${historic}`);
             let row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
             if (params.domain === Domain.ALERT && params.domainRef === DomainRef.WTC) {
                 console.log(`WTC Alert`);
@@ -972,12 +972,12 @@ $(document).ready(
                 }
 
                 if (row.length) {
-                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
                 } else {
                     addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime);
                     if (params.resend !== undefined && params.resend === 'no') {
                         row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
-                        addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                        addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
                     }
                 }
             } else if (params.domain === Domain.ALERT) { // but response to a request, not a wtc gemerated alert
@@ -1009,7 +1009,7 @@ $(document).ready(
                     addNoDataDetails(compositeKey, params, row);
                     return;
                 }
-                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
             } else if (params.domain === Domain.HISTORY) {
                 console.log(`History response`);
                 if (params.msgtype === undefined) {
@@ -1017,7 +1017,7 @@ $(document).ready(
                     addNoDataDetails(compositeKey, params, row);
                     return;
                 }
-                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
             } else if (params.domain === Domain.IOI) {
                 console.log(`IOI response`);
                 if (params.msgtype === undefined) {
@@ -1025,9 +1025,24 @@ $(document).ready(
                     addNoDataDetails(compositeKey, params, row);
                     return;
                 }
-                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionTime, row);
+                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
             } else if (params.domain === Domain.GUI) {
                 console.log(`GUI response`);
+                if (initialized!==undefined && !initialized && params.domainRef === DomainRef.PREFERENCES) {
+                    initialized = true;
+                    let alertQuery = params.settings[0].alertqueryrule;
+                    if (alertQuery === undefined || alertQuery === '') // fallback to default template
+                        alertQuery = params.template[0].alertqueryrule;
+                    if (alertQuery === undefined || alertQuery === '')
+                        console.warn('NO ALERT QUERY FOR WTC WINDOW!');
+                    else {
+                        console.log(`SEND ALERT QUERY`);
+                        const postObj = new PostMessage(null, null, null, null, null);
+                        alertQuery = alertQuery.replace(/[\r\n]/g, ''); // Remove new lines
+                        console.log(`SEND ALERT QUERY:${alertQuery}`);
+                        SendMessage(postObj.setAlert(alertQuery));
+                    }
+                }
             } else {
                 console.error(`Domain not handled:` + params.domain);
             }
