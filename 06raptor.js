@@ -163,7 +163,7 @@ $(document).ready(
                 {
                     name: 'compositeID',
                     targets: tableCols.ID,
-                    visible: debugTable
+                //    visible: debugTable
                 },
                 {
                     name: 'Reason',
@@ -193,11 +193,12 @@ $(document).ready(
                     visible: debugTable
                 }
             ],
-            order: [[tableCols.UTCDATETIME, 'desc']]
+            //order: [[tableCols.UTCDATETIME, 'desc']]
         });
 
         let tableH = $('#messagesTableHistoric').DataTable({
             responsive: true,
+            scrollCollapse: true,
             columnDefs: [
                 {
                     className: 'details-control',
@@ -239,7 +240,7 @@ $(document).ready(
                     visible: debugTable
                 }
             ],
-            order: [[tableCols.UTCDATETIME, 'desc']]
+            //order: [[tableCols.UTCDATETIME, 'desc']]
         });
 
         function formatPrice(price) {
@@ -446,21 +447,21 @@ $(document).ready(
         };
 
         function addNoDataDetails(compositeKey, params, row) {
-            if (params.domain === Domain.ALERT) {
-            } else if (params.domain === Domain.IOI) {
-            } else if (params.domain === Domain.ORDER) {
-            } else if (params.domain === Domain.HISTORY) {
-            } else if (params.domain === MsgType.HOLDINGSDATA) {
-            } else {
-                console.error(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
-            }
-            if (!row.child.isShown()) {
-                console.log("SHOW");
-                let tr = $(row.node());
-                let childContent = `<tr><td>NO DATA</td></tr>`
-                row.child(childContent).show();
-                tr.addClass('shown');
-            }
+        //    if (params.domain === Domain.ALERT) {
+        //    } else if (params.domain === Domain.IOI) {
+        //    } else if (params.domain === Domain.ORDER) {
+        //    } else if (params.domain === Domain.HISTORY) {
+        //    } else if (params.domain === MsgType.HOLDINGSDATA) {
+        //    } else {
+        //        console.error(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
+        //    }
+        //    if (!row.child.isShown()) {
+        //        console.log("SHOW");
+        //        let tr = $(row.node());
+        //        let childContent = `<tr><td>NO DATA</td></tr>`
+        //        row.child(childContent).show();
+        //        tr.addClass('shown');
+        //    }
         }
 
         function addResponseDetails(id, params, utcCompletionDateTime, lclCompletionTime, row) {
@@ -499,7 +500,7 @@ $(document).ready(
                 }
 
                 if (!row.child.isShown()) {
-                    console.log("SHOW");
+                    //console.log("SHOW");
                     //var curScrollTop = $(window).scrollTop();
                     //$('html').toggleClass('noscroll').css('top', '-' + curScrollTop + 'px');
 
@@ -942,11 +943,11 @@ $(document).ready(
             if (params.completiontime !== undefined) {
                 utcCompletionDateTime = fixDateTimeToJSDate(params.completiontime);
                 lclCompletionDateTime = new Date(utcCompletionDateTime);
-                if (lclCompletionDateTime < getLclToday()) // Initial messages wont have _H on the id, so check completion time
+                if (params.resend !== undefined && params.resend === 'yes' && lclCompletionDateTime < getLclToday()) // Only check completionTime for resends due to historic lookups
                     historic = true;
                 lclCompletionTime = removeMilliseconds(historic ? getLclDateTime(new Date(lclCompletionDateTime)) : getLclTime(new Date(lclCompletionDateTime)));
             }
-
+            console.log(`Historic:${historic}`);
             let row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
             if (params.domain === Domain.ALERT && params.domainRef === DomainRef.WTC) {
                 console.log(`WTC Alert`);
@@ -1070,8 +1071,8 @@ $(document).ready(
         function userAckAlert(compositeKey, RecordState) {//, RefTierMessageID) {
             const parts = compositeKey.toString().split('_');
             const _params = {
-                domain: 'alert',
-                domainRef: 'wtc',
+                domain: Domain.ALERT,
+                domainRef: DomainRef.WTC,
                 refmessageid: parts[0],
                 reftiermessageid: parts[1]
                 //messageId: compositeKey.split('_')[0],
@@ -1098,7 +1099,7 @@ $(document).ready(
             let holdingsID = row.data()[tableCols.HOLDINGSID];
             console.log(`ROW:${row.data()}`);
             if (row.child.isShown()) {
-                console.log("HIDE");                
+                //console.log("HIDE");                
                 row.child.hide();
                 tr.removeClass('shown');
             }
@@ -1188,7 +1189,7 @@ $(document).ready(
                 //    console.log(`No child!`);
                 //}
                 if (!bRunLookups) {
-                    console.log("HIDE");
+                    //console.log("HIDE");
                     //var curScrollTop = $(window).scrollTop();
                     //$('html').toggleClass('noscroll').css('top', '-' + curScrollTop + 'px');
 
