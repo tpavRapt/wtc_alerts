@@ -163,7 +163,7 @@ $(document).ready(
                 {
                     name: 'compositeID',
                     targets: tableCols.ID,
-                //    visible: debugTable
+                    visible: debugTable
                 },
                 {
                     name: 'Reason',
