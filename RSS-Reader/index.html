@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News</title>
+</head>
+<body>
+    <h1>Welcome to My News</h1>
+    <p>TODO</p>
+    <p id="searchSymbol"></p>
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const symbol = urlParams.get('getSymbol'); // Argument passed in on URL
+        if (symbol!== undefined && symbol!==null)
+            document.getElementById("searchSymbol").innerHTML = `Search for ${symbol}`;
+        else
+            document.getElementById("searchSymbol").innerHTML = "Search symbol should show here";
+    </script>
+</body>
+</html>

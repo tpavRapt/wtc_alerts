@@ -40,11 +40,11 @@ class PostMessage {
         return message;
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    openFilteredDashboard() {
+    openFilteredDashboard(badgeText) {
         const _params = {
             domain: 'gui',
             domainRef: 'window',
-            page: `./SalesDash/index.html?getClient=${this.type}&getSymbol=${this.symbol}`
+            page: `./SalesDash/index.html?getClient=${this.type}&badge=${badgeText}&getSymbol=${this.symbol}&getClient=${this.type}`
         };
         const message = AddRequiredRequestKeys(undefined, 'POST', _params);
 //        const message = {

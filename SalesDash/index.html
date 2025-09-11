@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Dash</title>
+</head>
+<body>
+    <h1>Welcome to My Sales Dash</h1>
+    <p>TODO</p>
+    <p id="theBadge"></p>
+    <p id="searchSymbol"></p>
+    <p id="searchClient"></p>
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+
+        const badge = urlParams.get('badge'); // Argument passed in on URL
+        if (badge!== undefined && badge!==null)
+            document.getElementById("theBadge").innerHTML = `Reason badge ${badge}`;
+        else
+            document.getElementById("theBadge").innerHTML = "The reason badge should show here";
+
+        const symbol = urlParams.get('getSymbol'); // Argument passed in on URL
+        if (symbol!== undefined && symbol!==null)
+            document.getElementById("searchSymbol").innerHTML = `Search for ${symbol}`;
+        else
+            document.getElementById("searchSymbol").innerHTML = "Search symbol should show here";
+
+        const client = urlParams.get('getClient'); // Argument passed in on URL
+        if (client!== undefined && client!==null)
+            document.getElementById("searchClient").innerHTML = `Search for ${client}`;
+        else
+            document.getElementById("searchClient").innerHTML = "Search client should show here";
+    </script>
+</body>
+</html>

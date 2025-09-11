@@ -148,10 +148,11 @@ $(document).ready(
         const debugTable = false;
 
         let table = $('#messagesTable').DataTable({
-            responsive: true,
-            //scrollY: '600px',
-            scrollCollapse: true,
-            columnDefs: [
+            responsive: true
+            //, scrollY: '600px'
+            , scrollCollapse: true
+            , order: [[tableCols.UTCDATETIME, 'desc']] // Initial sort order
+            , columnDefs: [
                 {
                     className: 'details-control',
                     orderable: false,
@@ -191,14 +192,14 @@ $(document).ready(
                     targets: tableCols.HOLDINGSID,
                     visible: debugTable
                 }
-            ],
-            //order: [[tableCols.UTCDATETIME, 'desc']]
+            ]
         });
 
         let tableH = $('#messagesTableHistoric').DataTable({
-            responsive: true,
-            scrollCollapse: true,
-            columnDefs: [
+            responsive: true
+            , scrollCollapse: true
+            , order: [[tableCols.UTCDATETIME, 'desc']] // Initial sort order
+            , columnDefs: [
                 {
                     className: 'details-control',
                     orderable: false,
@@ -238,8 +239,7 @@ $(document).ready(
                     targets: tableCols.HOLDINGSID,
                     visible: debugTable
                 }
-            ],
-            //order: [[tableCols.UTCDATETIME, 'desc']]
+            ]
         });
 
         function formatPrice(price) {
@@ -380,13 +380,13 @@ $(document).ready(
             return noMili;
         }
 
-        function addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime) {
+        function addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime) {
             console.log(`Adding Alert Row:` + message.id);
             if (!historic) {
                 table.row.add([
                     '',                                                                                     // 0 - <button>
                     message.id,                                                                             // 1 - MessageID_RefTierMessageID
-                    params.companyalias,                                                                    // 2 - Client
+                    params.refcompanyid,                                                                    // 2 - Client
                     Array.isArray(params.companymatchattrib)                                                // 3 - Reason
                         ? params.companymatchattrib.map(WTCFormat).join(' ')
                         : WTCFormat(params.companymatchattrib),
@@ -407,7 +407,7 @@ $(document).ready(
                 tableH.row.add([
                     '',                                                                                     // 0 - <button>
                     message.id,                                                                             // 1 - MessageID_RefTierMessageID
-                    params.companyalias,                                                                    // 2 - Client
+                    params.refcompanyid,                                                                    // 2 - Client
                     Array.isArray(params.companymatchattrib)                                                // 3 - Reason
                         ? params.companymatchattrib.map(WTCFormat).join(' ')
                         : WTCFormat(params.companymatchattrib),
@@ -418,22 +418,22 @@ $(document).ready(
                     params.messageid || 'Missing',                                                          // 8 - MessageID
                     formatShares(params.ioishares) || 'Missing',                                            // 9 - IOIShares
                     WTCFormat(params.side) || 'Missing',                                                    // 10- Opportunity
-                    lclCompletionTime || 'Missing',                                                         // 11- When
+                    removeMilliseconds(lclCompletionDateTime) || 'Missing',                                                         // 11- When
                     utcCompletionDateTime || 'Missing',                                                     // 12- hidden datetime for ordering
                     params.holdingsrefaccountid || 'Missing',                                               // 13- HoldingsRefAccountID
                     '<div class="badge-news fs-10 badge-tj-success"><span class="fw-bold">READ</span></div>'// 14- News
                 ]).node().id = 'row-' + message.id;
                 tableH.draw();
             }
-
         }
 
-        function updateAlertMessage(message, params, lclCompletionTime, row) {
+        function updateAlertMessage(message, params, lclCompletionTime, utcCompletionDateTime, row) {
             console.log(`Updating Alert Row:` + message.id);
             //console.log(row.data());
             let rowData = row.data();
             rowData[tableCols.STATUS] = WTCFormat(params.recordstate) || 'Missing';
             rowData[tableCols.WHEN] = lclCompletionTime || 'Missing';
+            //rowData[tableCols.UTCDATETIME] = utcCompletionDateTime || 'Missing';
             row.data(rowData).draw(false);
         }
 
@@ -446,21 +446,21 @@ $(document).ready(
         };
 
         function addNoDataDetails(compositeKey, params, row) {
-        //    if (params.domain === Domain.ALERT) {
-        //    } else if (params.domain === Domain.IOI) {
-        //    } else if (params.domain === Domain.ORDER) {
-        //    } else if (params.domain === Domain.HISTORY) {
-        //    } else if (params.domain === MsgType.HOLDINGSDATA) {
-        //    } else {
-        //        console.error(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
-        //    }
-        //    if (!row.child.isShown()) {
-        //        console.log("SHOW");
-        //        let tr = $(row.node());
-        //        let childContent = `<tr><td>NO DATA</td></tr>`
-        //        row.child(childContent).show();
-        //        tr.addClass('shown');
-        //    }
+            //    if (params.domain === Domain.ALERT) {
+            //    } else if (params.domain === Domain.IOI) {
+            //    } else if (params.domain === Domain.ORDER) {
+            //    } else if (params.domain === Domain.HISTORY) {
+            //    } else if (params.domain === MsgType.HOLDINGSDATA) {
+            //    } else {
+            //        console.error(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
+            //    }
+            //    if (!row.child.isShown()) {
+            //        console.log("SHOW");
+            //        let tr = $(row.node());
+            //        let childContent = `<tr><td>NO DATA</td></tr>`
+            //        row.child(childContent).show();
+            //        tr.addClass('shown');
+            //    }
         }
 
         function addResponseDetails(id, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row) {
@@ -827,7 +827,7 @@ $(document).ready(
             const selectedData = {
                 Type: params.msgtype || 'Missing',
                 Symbol: params.symbol || 'Missing',
-                Exchange: params.exchange || 'Missing',
+                Exchange: params.holdingsexchange || 'Missing',
                 Account: params.holdingsaccount || 'Missing',
                 'Shares Held': formatNumber(params.holdingssharesheld) || 'Missing',
                 '% held': numberToPercentage(params.holdingspercentheld) || 'Missing',
@@ -941,11 +941,15 @@ $(document).ready(
             let lclCompletionTime = undefined;
             if (params.completiontime !== undefined) {
                 utcCompletionDateTime = fixDateTimeToJSDate(params.completiontime);
-                lclCompletionDateTime = getLclDateTime(new Date(utcCompletionDateTime));
-                console.log(`CHECK: ${new Date(utcCompletionDateTime)} < ${getLclToday()} ? ${new Date(utcCompletionDateTime) < getLclToday()}`);
+                //console.log(`UTC: ${getUTCDateTimeStr(utcCompletionDateTime)}`);
+                lclCompletionDateTime = getLclDateTimeStr(utcCompletionDateTime);
+                //console.log(`LCL: ${lclCompletionDateTime}`);
                 if (params.resend !== undefined && params.resend === 'yes' && new Date(utcCompletionDateTime) < getLclToday()) // Only check completionTime for resends due to historic lookups
+                {
                     historic = true;
-                lclCompletionTime = removeMilliseconds(historic ? getLclDateTime(new Date(utcCompletionDateTime)) : getLclTime(new Date(utcCompletionDateTime)));
+                    console.log(`HISTORY TIME ${lclCompletionDateTime}`);
+                }
+                lclCompletionTime = removeMilliseconds(historic ? getLclDateTimeStr(new Date(utcCompletionDateTime)) : getLclTimeStr(new Date(utcCompletionDateTime)));
             }
             //console.log(`Historic:${historic}`);
             let row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
@@ -958,9 +962,9 @@ $(document).ready(
                 }
                 if (params.recordstate !== undefined && params.recordstate === 'acknowledged') {
                     if (row.length) {
-                        updateAlertMessage(message, params, lclCompletionTime, row);
-                    } else if (params.resend !== undefined && params.resend === 'yes') {
-                        addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime);
+                        updateAlertMessage(message, params, lclCompletionTime, utcCompletionDateTime, row);
+                    } else if (params.resend !== undefined && params.resend === 'yes') { // Reload old alerts
+                        addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
                     } else {
                         console.error(`Update for non existent row ${row}`);
                     }
@@ -974,7 +978,7 @@ $(document).ready(
                 if (row.length) {
                     addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
                 } else {
-                    addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionTime);
+                    addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
                     if (params.resend !== undefined && params.resend === 'no') {
                         row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
                         addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
@@ -1000,7 +1004,7 @@ $(document).ready(
                     else if (params.loglevel == 'info')
                         clientLogLevel = LogLevel.INFO;
                     else
-                        clientLogLevel = LogLevel.NONE;   
+                        clientLogLevel = LogLevel.NONE;
                 }
             } else if (params.domain === Domain.ORDER) {
                 console.log(`Order response`);
@@ -1028,7 +1032,7 @@ $(document).ready(
                 addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
             } else if (params.domain === Domain.GUI) {
                 console.log(`GUI response`);
-                if (initialized!==undefined && !initialized && params.domainRef === DomainRef.PREFERENCES) {
+                if (initialized !== undefined && !initialized && params.domainRef === DomainRef.PREFERENCES) {
                     initialized = true;
                     let alertQuery = params.settings[0].alertqueryrule;
                     if (alertQuery === undefined || alertQuery === '') // fallback to default template
@@ -1052,18 +1056,18 @@ $(document).ready(
         function handleMessage(event) {
             if (event.data.length > 0) {
                 let messages = JSON.parse(event.data);
-                console.log(`\n[${getLclTime()}]`);
+                console.log(`\n[${getLclTimeStr()}]`);
 
                 // --- LokiJS: Save messages to DB ---
                 if (Array.isArray(messages)) {
                     messages.forEach(msg => {
-                        console.info(`[${getLclTime()}] Rcv: ${JSON.stringify(msg)}`);
+                        console.info(`[${getLclTimeStr()}] Rcv: ${JSON.stringify(msg)}`);
                         messagesCollection.insert(msg);
                         upsertIndexedDbMessage(msg);
                         handleSingleMessage(msg)
                     });
                 } else {
-                    console.info(`[${getLclTime()}] Rcv: ${JSON.stringify(messages)}`);
+                    console.info(`[${getLclTimeStr()}] Rcv: ${JSON.stringify(messages)}`);
                     messagesCollection.insert(messages);
                     upsertIndexedDbMessage(messages);
                     handleSingleMessage(messages)
@@ -1102,6 +1106,7 @@ $(document).ready(
             }
         }
 
+        // Historic - User clicked on blue arrow to drop down details of alert
         $('#messagesTableHistoric tbody').on('click', 'td.details-control', function () {
             let tr = $(this).closest('tr');
             let row = tableH.row(tr);
@@ -1257,13 +1262,26 @@ $(document).ready(
             let rowClient = row.data()[tableCols.CLIENT];
             let rowSymbol = row.data()[tableCols.IOISYMBOL];
             let compositeKey = row.data()[tableCols.ID];
-
-            console.log(`Opening Sales Dashboard for client ${rowClient} and ${rowSymbol} `);
+            let badgeText = $(this).text(); 
+            console.log(`Opening Sales Dashboard for ${badgeText} - client ${rowClient} and ${rowSymbol} `);
             const postObj = new PostMessage(compositeKey, rowClient, null, rowSymbol, null);
-            SendMessage(postObj.openFilteredDashboard());
+            SendMessage(postObj.openFilteredDashboard(badgeText));
 
         });
+        // Historic Reason column
+        $('#messagesTableHistoric tbody').on('click', '.badge-link', function () {
+            //console.log(`ACTION: REASON`);
+            let tr = $(this).closest('tr');
+            let row = tableH.row(tr);
+            let rowClient = row.data()[tableCols.CLIENT];
+            let rowSymbol = row.data()[tableCols.IOISYMBOL];
+            let compositeKey = row.data()[tableCols.ID];
+            let badgeText = $(this).text();
+            console.log(`Opening Sales Dashboard for ${badgeText} - client ${rowClient} and ${rowSymbol} `);
+            const postObj = new PostMessage(compositeKey, rowClient, null, rowSymbol, null);
+            SendMessage(postObj.openFilteredDashboard(badgeText));
 
+        });
         // News column
         $('#messagesTable tbody').on('click', '.badge-news', function () {
             //console.log(`ACTION: NEWS`);
@@ -1278,6 +1296,7 @@ $(document).ready(
             SendMessage(postObj.loadFilteredNews());
 
         });
+        // Historic News column
         $('#messagesTableHistoric tbody').on('click', '.badge-news', function () {
             //console.log(`ACTION: NEWS`);
             let tr = $(this).closest('tr');
@@ -1292,6 +1311,12 @@ $(document).ready(
 
         });
 
+        $('#restoreSort').on('click', function () {
+            // Use the order.neutral() API to reset the sort
+            table.order.neutral().draw();
+        });
+
+        // Initalize page and JSON listener
         if (window.chrome && window.chrome.webview) {
             window.chrome.webview.addEventListener('message', handleMessage);
             initializeApp();

@@ -1,3 +1,70 @@
+
+/*
+:root {
+    --dt-icon-sort: url("images/sort_both.png");
+    --dt-icon-sort-asc: url("images/sort_asc.png");
+    --dt-icon-sort-desc: url("images/sort_desc.png");
+}
+*/
+/*
+table.dataTable thead .sorting_asc {
+    background-image: url("xxximages/sort_asc.png");
+}
+table.dataTable thead .sorting_desc {
+    background-image: url("xxximages/sort_desc.png");
+}
+table.dataTable thead .sorting {
+    background-image: url("xxximages/sort_both.png");
+}
+*/
+/* Unsorted column */
+table.dataTable thead .sorting:after {
+  /*content: "⇳" !important;*/
+  opacity: 0.5;
+}
+
+/* Ascending sort */
+table.dataTable thead .sorting_asc:after {
+  content: "⇧" !important;
+  opacity: 1;
+}
+
+/* Descending sort */
+table.dataTable thead .sorting_desc:after {
+  content: "⇩" !important;
+  opacity: 1;
+}
+/*
+.table.dataTable thead > tr > th.sorting::after,
+.table.dataTable thead > tr > th.sorting_asc::after,
+.table.dataTable thead > tr > th.sorting_desc::after {
+  position: relative;
+  left: 5px;
+  top: 2px;
+}
+.table.dataTable thead > tr > th.sorting::after {
+  content: "";
+  background-image: url('images/sort_both.png');
+  background-size: contain;
+  height: 16px;
+  width: 16px;
+}
+.table.dataTable thead > tr > th.sorting_asc::after {
+  content: "";
+  background-image: url('images/sort_asc.png');
+  background-size: contain;
+  height: 16px;
+  width: 16px;
+}
+.table.dataTable thead > tr > th.sorting_desc::after {
+  content: "";
+  background-image: url('images/sort_desc.png');
+  background-size: contain;
+  height: 16px;
+  width: 16px;
+}
+*/
+
 /* General table styling */
 .dataTables_wrapper .dataTables_filter {
     float: right;
@@ -198,3 +265,8 @@ html.noscroll {
         overflow-y: scroll !important; /* Keep scrollbar if content overflows fixed area */
         z-index: 10;
     }
+
+
+.cooldown-color {
+    background-color: #ffa600;
+}
