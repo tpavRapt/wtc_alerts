@@ -359,11 +359,12 @@ $(document).ready(
                 return field
                     .split(',')
                     .map(f => f.trim())
-                    .filter(f => f !== 'IH')  // Filter out 'IH' values
+                    //.filter(f => f !== 'IH')  // Filter out 'IH' values
                     .map(f => formatSingleField(f))
                     .join(' ');
             } else {
-                return field === 'IH' ? '' : formatSingleField(field);
+                //return field === 'IH' ? '' : formatSingleField(field);
+                return formatSingleField(field);
             }
         }
 
@@ -386,7 +387,7 @@ $(document).ready(
                 table.row.add([
                     '',                                                                                     // 0 - <button>
                     message.id,                                                                             // 1 - MessageID_RefTierMessageID
-                    params.refcompanyid,                                                                    // 2 - Client
+                    params.companyalias || 'Missing Company Alias',                                         // 2 - Client
                     Array.isArray(params.companymatchattrib)                                                // 3 - Reason
                         ? params.companymatchattrib.map(WTCFormat).join(' ')
                         : WTCFormat(params.companymatchattrib),
@@ -407,7 +408,7 @@ $(document).ready(
                 tableH.row.add([
                     '',                                                                                     // 0 - <button>
                     message.id,                                                                             // 1 - MessageID_RefTierMessageID
-                    params.refcompanyid,                                                                    // 2 - Client
+                    params.companyalias || 'Missing Company Alias',                                         // 2 - Client
                     Array.isArray(params.companymatchattrib)                                                // 3 - Reason
                         ? params.companymatchattrib.map(WTCFormat).join(' ')
                         : WTCFormat(params.companymatchattrib),
@@ -470,7 +471,8 @@ $(document).ready(
                 let holdingsDetails = '';
                 let ioiDetails = '';
                 let orderDetails = '';
-                let histDetails = '';
+                let histordDetails = '';
+                let histioiDetails = '';
                 let alertIOIDetails = '';
 
                 //Details for IOI that generated the Alert
@@ -479,14 +481,17 @@ $(document).ready(
                 }
                 else if (params.msgtype === MsgType.IOI) {
                     //console.log('It did find domain = IOI');
-                    ioiDetails = getFormattedDetails_IIOI(params, utcCompletionDateTime, lclCompletionTime);
+                    if (params.domain === Domain.HISTORY)
+                        histioiDetails = getFormattedDetails_HISTORICALIOI(params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
+                    else
+                        ioiDetails = getFormattedDetails_IIOI(params, utcCompletionDateTime, lclCompletionTime);
                 }
                 // Details for INTRADAY Order & Historical Order
                 else if (params.msgtype === MsgType.FSMDCORDER || params.msgtype === MsgType.FSMINORDER) {
                     if (params.domain === Domain.ORDER)
                         orderDetails = getFormattedDetails_INTRADAYORDER(params, utcCompletionDateTime, lclCompletionTime);
                     else if (params.domain === Domain.HISTORY)
-                        histDetails = getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
+                        histordDetails = getFormattedDetails_HISTORICALORDER(params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
                     else
                         console.warn(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
                 }
@@ -509,12 +514,13 @@ $(document).ready(
                             <tr>
                                 <td style="vertical-align: top;" id="alert-${compositeKey}">${alertIOIDetails}</td>    
                                 <td style="vertical-align: top;" id="orders-${compositeKey}">${orderDetails}</td>
-                                <td style="vertical-align: top;" id="hist-${compositeKey}">${histDetails}</td>
+                                <td style="vertical-align: top;" id="histord-${compositeKey}">${histordDetails}</td>
+                                <td style="vertical-align: top;" id="histioi-${compositeKey}">${histioiDetails}</td>
                                 <td style="vertical-align: top;" id="ioi-${compositeKey}">${ioiDetails}</td>
                                 <td style="vertical-align: top;" id="holdings-${compositeKey}">${holdingsDetails}</td>
                             </tr>
                     `;
-                    if (alertIOIDetails === '' && orderDetails === '' && histDetails === '' && ioiDetails === '' && holdingsDetails === '')
+                    if (alertIOIDetails === '' && orderDetails === '' && histordDetails === '' && ioiDetails === '' && histioiDetails === '' && holdingsDetails === '')
                         childContent = `<tr>NO DATA</tr>`
                     row.child(childContent).show();
                     tr.addClass('shown');
@@ -522,14 +528,17 @@ $(document).ready(
                 } else {
                     console.log("UPDATE CHILD DATA");
                     if (params.msgtype === MsgType.IOI) { // IIOI
-                        $(`#ioi-${compositeKey}`).html(ioiDetails);
+                        if (params.domain === Domain.HISTORY)
+                            $(`#histioi-${compositeKey}`).html(histioiDetails);  // HISTORICALORDER
+                        else
+                            $(`#ioi-${compositeKey}`).html(ioiDetails);
                     }
                     else if (params.msgtype === MsgType.FSMDCORDER || params.msgtype === MsgType.FSMINORDER) {
                         // Only update the Order cell
                         if (params.domain === Domain.ORDER)
                             $(`#orders-${compositeKey}`).html(orderDetails); // INTRADAYORDER
                         if (params.domain === Domain.HISTORY)
-                            $(`#hist-${compositeKey}`).html(histDetails);  // HISTORICALORDER
+                            $(`#histord-${compositeKey}`).html(histordDetails);  // HISTORICALORDER
                     }
                     // If the row is already shown, update its content separately
                     else if (params.msgtype === MsgType.HOLDINGSDATA) { // HOLDINGS
@@ -591,7 +600,7 @@ $(document).ready(
             const selectedData = {
                 'Received IOI': findCommonElement(params.ioiattrib, aArgs),
                 Time: lclCompletionTime || 'Missing',
-                Symbol: params.symbol + ` (${params.exdestination})` || 'Missing',
+                Symbol: params.symbol + (params.exdestination!==undefined?` (${params.exdestination})` : ' (NoExch)'),
                 Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
                 Side: fullSide(params.side) || 'Missing',
                 IOIShares: formatShares(params.ioishares) || 'Missing',
@@ -651,7 +660,66 @@ $(document).ready(
             const selectedData = {
                 Type: 'Intraday IOI' || 'Missing',
                 Time: lclCompletionTime || 'Missing',
-                Symbol: params.symbol + ` (${params.exdestination})` || 'Missing',
+                Symbol: params.symbol + (params.exdestination!==undefined?` (${params.exdestination})` : ' (NoExch)'),
+                Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
+                Side: fullSide(params.side) || 'Missing',
+                IOIShares: formatShares(params.ioishares) || 'Missing',
+                User: fistUserName(params.sourcelogonname) || 'Missing',
+            };
+            formattedDetails = `
+                <div style="
+                    background: #181b20;
+                    border: 2px solid;
+                    border-radius: 22px;
+                    padding: 18px 24px 14px 24px;
+                    color: #fff;
+                    font-size: 1em;
+                    min-width: 240px;
+                    max-width: 340px;
+                    margin: 0 auto;
+                    box-shadow: 0 2px 12px #0003;
+                ">
+                    <ul style="list-style-type: none; padding: 0; margin: 0; border-radius: 16px;">
+                        <li>
+
+                            <span style="font-weight: bold;">${selectedData['Type']}</span>
+                        </li>
+                        <li>
+                            <span style="font-weight: bold; color: #fff;">Time:</span>
+                            <span style="margin-left: 8px;">${selectedData['Time']}</span>
+                        </li>
+                        <li>
+                            <span style="font-weight: bold; color: #fff;">Symbol:</span>
+                            <span style="margin-left: 8px;">${selectedData['Symbol']}</span>
+                        </li>
+                        <li>
+                            <span style="font-weight: bold; color: #fff;">Price:</span>
+                            <span style="margin-left: 8px;">${selectedData['Price']}</span>
+                        </li>
+                        <li>
+                            <span style="font-weight: bold; color: #fff;">Side:</span>
+                            <span style="margin-left: 8px;">${selectedData['Side']}</span>
+                        </li>
+                        <li>
+                            <span style="font-weight: bold; color: #fff;">IOIShares:</span>
+                            <span style="margin-left: 8px;">${selectedData['IOIShares']}</span>
+                        </li>
+                        <li>
+                            <span style="font-weight: bold; color: #fff;">User:</span>
+                            <span style="margin-left: 8px;">${selectedData['User']}</span>
+                        </li>
+                    </ul>
+                </div>
+                `;
+            return formattedDetails;
+        }
+        function getFormattedDetails_HISTORICALIOI(params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime) {
+            console.log('LAYOUT: HISTORICALIOI');
+            const fields = ['Type', 'Time', 'Symbol', 'Price', 'Side', 'IOIShares', 'User'];
+            const selectedData = {
+                Type: 'Historical IOI' || 'Missing',
+                Time: removeMilliseconds(lclCompletionDateTime) || 'Missing',
+                Symbol: params.symbol  + (params.exdestination!==undefined?` (${params.exdestination})` : ' (NoExch)'),
                 Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
                 Side: fullSide(params.side) || 'Missing',
                 IOIShares: formatShares(params.ioishares) || 'Missing',
@@ -710,7 +778,7 @@ $(document).ready(
             const selectedData = {
                 Type: 'Order',
                 Time: lclCompletionTime || 'Missing',
-                Symbol: params.symbol + ` (${params.raiexchangeid})` || 'Missing',
+                Symbol: params.symbol + (params.raiexchangeid!==undefined?` (${params.raiexchangeid})` : ' (NoExch)'),
                 Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
                 'Qty (avai/exec)': (formatShares(params.availqty) + ' / ' + formatShares(params.cumqty) + ' (' + calcPercentage(params.cumqty, params.availqty) + '%)') || 'Missing',
                 Side: fullSide(params.side) || 'Missing',
@@ -768,7 +836,7 @@ $(document).ready(
             const selectedData = {
                 Type: 'Historical Order' + ` (${params.msgtype})`,
                 Time: removeMilliseconds(lclCompletionDateTime) || 'Missing',
-                Symbol: params.symbol + ` (${params.raiexchangeid})` || 'Missing',
+                Symbol: params.symbol + (params.raiexchangeid!==undefined?` (${params.raiexchangeid})` : ' (NoExch)'),
                 Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
                 'Qty (avai/exec)': (formatShares(params.orderqty) + ' / ' + formatShares(params.cumqty) + ' (' + calcPercentage(params.cumqty, params.orderqty) + '%)') || 'Missing',
                 Side: fullSide(params.side) || 'Missing',
@@ -990,10 +1058,10 @@ $(document).ready(
                 console.log(`System response`);
                 if (params.domainRef === DomainRef.VERSION) {
                     document.title = `Quick Who-To-Call v${params.version} Usr:${params.name} | O-HIST = Historical Order | 13F = Holdings Data | I-CROSS = Intraday IOIs  | O-CROSS = Intraday Order`
-                    if (params.qalogging !== undefined && params.qalogging === "yes")
-                        qaLogging = true;
-                    else
-                        qaLogging = false;
+                    //if (params.qalogging !== undefined && params.qalogging === "yes")
+                    //    qaLogging = true;
+                    //else
+                    //    qaLogging = false;
 
                     if (params.loglevel == 'debug')
                         clientLogLevel = LogLevel.DEBUG;

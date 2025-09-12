@@ -1,6 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GLOBALS
-var qaLogging = false;
 var requestCounter = 0;  // Counter for tracking requests
 const LogLevel = {
     NONE: 0,
@@ -177,7 +176,7 @@ console.log = function (...args) {
         return arg;
     });
     originalConsoleInfo.call(console, text.toString());
-    if (qaLogging || (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.INFO)) {
+    if (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.INFO) {
         const _params = {
             domain: 'log',
             loglevel: 'info',
@@ -195,7 +194,7 @@ console.info = function (...args) {
         return `${arg}`;
     });
     originalConsoleLog.call(console, text.toString());
-    if (qaLogging || (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.INFO)) {
+    if (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.INFO) {
         const _params = {
             domain: 'log',
             loglevel: 'info',
@@ -213,7 +212,7 @@ console.warn = function (...args) {
         return `${arg}`;
     });
     originalConsoleWarn.call(console, text.toString());
-    if (qaLogging || (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.WARNING)) {
+    if (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.WARNING) {
         const _params = {
             domain: 'log',
             loglevel: 'warning',
@@ -231,7 +230,7 @@ console.error = function (...args) {
         return `${arg}`;
     });
     originalConsoleError.call(console, text.toString());
-    if (qaLogging || (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.ERROR)) {
+    if (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.ERROR) {
         const _params = {
             domain: 'log',
             loglevel: 'error',
@@ -249,7 +248,7 @@ console.debug = function (...args) {
         return `${arg}`;
     });
     originalConsoleDebug.call(console, text.toString());
-    if (qaLogging || (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.DEBUG)) {
+    if (clientLogLevel !== LogLevel.NONE && clientLogLevel <= LogLevel.DEBUG) {
         const _params = {
             domain: 'log',
             loglevel: 'debug',
