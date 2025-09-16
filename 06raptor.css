@@ -270,3 +270,7 @@ html.noscroll {
 .cooldown-color {
     background-color: #ffa600;
 }
+
+body.no-scroll {
+    overflow: hidden;
+}

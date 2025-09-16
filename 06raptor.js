@@ -560,6 +560,16 @@ $(document).ready(
             }
         }
 
+        function scrollOff() {
+            console.log(`SCROLL OFF`);
+            document.body.classList.add('no-scroll');
+        }
+
+        function scrollOn() {
+            console.log(`SCROLL ON`);
+            document.body.classList.remove('no-scroll');
+        }
+
         function calcPercentage(a, b) {
 
             if (isNaN(b) === true) {
@@ -578,6 +588,8 @@ $(document).ready(
         }
 
         function findCommonElement(arr1, arr2) {
+            if (arr1 === undefined)
+                return 'Not Owner';
             const txt = arr1.find(element => arr2.includes(element));
             //console.log(`DATA: ${arr1} & ${arr2} = ${txt}`);
             return txt;
@@ -1110,7 +1122,7 @@ $(document).ready(
                     else {
                         console.log(`SEND ALERT QUERY`);
                         const postObj = new PostMessage(null, null, null, null, null);
-                        alertQuery = alertQuery.replace(/[\r\n]/g, ''); // Remove new lines
+                        alertQuery = alertQuery.replace(/[\r\n]/g, ' '); // Replace new lines with space. DONT USE '' else words on different lines will concatonate
                         console.log(`SEND ALERT QUERY:${alertQuery}`);
                         SendMessage(postObj.setAlert(alertQuery));
                     }

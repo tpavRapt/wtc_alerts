@@ -31,7 +31,7 @@ class PostMessage {
         const params = {
             domain: 'alert',
             domainRef: 'ioi',
-            id:'HotIOIs',
+            id:'WTCAlerts',
             alertbehavior:`RaptorDesktop`,
             storedproctype:`IOI`,
             query:alertQuery
