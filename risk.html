@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Template</title>
+
+    <script src="01jquery-3.6.0.min.js"></script>
+    <script src="02jquery.dataTables.min.js"></script>
+    <script src="03dataTables.responsive.min.js"></script>
+    <script src="04config.js"></script>
+    <script src="05classes.js"></script>
+    <script src="risk.js"></script>
+    <script src="99common.js"></script>
+    <!-- ADD THIS: Bootstrap 5 JS (after jQuery, before your custom scripts if any depend on Bootstrap) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        table.dataTable.cell-border>tbody>tr>* {
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
+            border-left: 1px solid rgba(0, 0, 0, 0.15);
+            border-right: 1px solid rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+    COMPANY
+    <table id="companyTable" class="table align-middle mb-0 cell-border" style="width:100%">
+        <thead>
+            <tr>
+                <th>messageId</th>
+                <th>companyName</th>
+                <th>companyAlias</th>
+                <th>connectionStatus</th>
+                <th>completionTime</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <br>
+    ORDERS
+    <table id="orderTable" class="table align-middle mb-0 cell-border" style="width:100%">
+        <thead>
+            <tr>
+                <th>messageId</th>
+                <th>orderStatus</th>
+                <th>symbol</th>
+                <th>side</th>
+                <th>orderQty</th>
+                <th>completionTime</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <br>
+    RISK POSITIONS
+    <table id="riskTable" class="table align-middle mb-0 cell-border" style="width:100%">
+        <thead>
+            <tr>
+                <th>messageId</th>
+                <th>companyAlias</th>
+                <th>rmPositionValue</th>
+                <th>rmPendingValue</th>
+                <th>pendingLongs</th>
+                <th>pendingSells</th>
+                <th>pendingShorts</th>
+                <th>rmNetTotalValue</th>
+                <th>completionTime</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <br>
+    RISK SETTINGS
+    <table id="riskSettingsTable" class="table align-middle mb-0 cell-border" style="width:100%">
+        <thead>
+            <tr>
+                <th>messageId</th>
+                <th>companyAlias</th>
+                <th>rmAttrib</th>
+                <th>buyOrdQtyLimit3</th>
+                <th>actionWhenInViolation</th>
+                <th>completionTime</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</body>
+
+</html>

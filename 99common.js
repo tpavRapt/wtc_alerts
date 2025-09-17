@@ -11,18 +11,26 @@ const LogLevel = {
 var clientLogLevel = LogLevel.NONE;
 
 const Domain = {
-    ALERT: 'alert'
-    , ORDER: 'order'
-    , IOI: 'ioi'
-    , HISTORY: 'history'
-    , HOLDINGS: 'Holdings'
+      SYSTEM: 'system'
+    , LOG: 'log'
+    , DATABASE: 'database'
+    , COMMS: 'comms'
     , GUI: 'gui'
-    , SYSTEM: 'system'
+    , ALERT: 'alert'
+    , HISTORY: 'history'
+    , ORDER: 'order'
+    , DROPCOPY: 'dropcopy'
+    , IOI: 'ioi'
+    , AT: 'at'
+    , COMPANY: 'company'
+    , RISK: 'risk'
 };
 const DomainRef = {
     WTC: 'wtc'
     , VERSION: 'version'
     , PREFERENCES: 'preferences'
+    , QUERY: 'query'
+    , SUBSCRIPTION: 'subscription'
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,8 +64,8 @@ function getLclDateTimeStr(now = new Date()) {
     //console.log(`TIME:${time}`);
     const [month, day, year] = date.split('/');
     const [hours, minutes, seconds] = time.split(':');
-    return year.padStart(4,'0') + '-' +month.padStart(2,'0') + '-'+day.padStart(2,'0') + ' '
-        + hours.padStart(2,'0') + ':' +minutes.padStart(2,'0') + ':'+seconds.padStart(2,'0') + '.' + String(now.getMilliseconds()).padStart(3, '0');
+    return year.padStart(4, '0') + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0') + ' '
+        + hours.padStart(2, '0') + ':' + minutes.padStart(2, '0') + ':' + seconds.padStart(2, '0') + '.' + String(now.getMilliseconds()).padStart(3, '0');
 }
 
 function getLclTimeStr(now = new Date()) {
@@ -106,6 +114,12 @@ function fixDateTimeToJSDate(fixDateTimeString) {
     // Assuming the FIX time is UTC, append 'Z' for Zulu time (UTC)
     //const isoString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}Z`;
     return new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds));
+}
+
+
+function removeMilliseconds(field) {
+    let noMili = field.split('.')[0];
+    return noMili;
 }
 
 const rgbToObj = (rgbStr) => {
@@ -258,3 +272,71 @@ console.debug = function (...args) {
         window.chrome.webview.postMessage(JSON.stringify(message));
     }
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Validation
+function ValidateRequestFromRaptor(message) {
+    if (message.id === undefined) {
+        console.error(`Raptor Request missing id.` + message);
+        return false;
+    } else if (message.timestamp === undefined) {
+        console.error(`Raptor Request missing timestamp.` + message);
+        return false;
+    } else if (message.method === undefined) {
+        console.error(`Raptor Request missing method.` + message);
+        return false;
+    } else if (message.params === undefined) {
+        console.error(`Raptor Request missing params.` + message);
+        return false;
+    }
+    if (Array.isArray(message.params))// params is array
+    {
+        message.params.forEach(element => {
+            if (element.domain === undefined) {
+                console.error(`Raptor Request missing domain from param array.` + message);
+                return false;
+            }
+        });
+    }
+    else // params is object
+    {
+        if (message.params.domain === undefined) {
+            console.error(`Raptor Request missing params domain.` + message);
+            return false;
+        }
+    }
+    return true;
+}
+
+function ValidateResponseFromRaptor(message) {
+    if (message.id === undefined) {
+        console.error(`Raptor Response missing id.` + message);
+        return false;
+    } else if (message.timestamp === undefined) {
+        console.error(`Raptor Response missing timestamp.` + message);
+        return false;
+    } else if (message.status === undefined) {
+        console.error(`Raptor Response missing status.` + message);
+        return false;
+    } else if (message.params === undefined) {
+        console.error(`Raptor Response missing params.` + message);
+        return false;
+    }
+    if (Array.isArray(message.params))// params is array
+    {
+        message.params.forEach(element => {
+            if (element.domain === undefined) {
+                console.error(`Raptor Response missing domain from param array.` + message);
+                return false;
+            }
+        });
+    }
+    else // params is object
+    {
+        if (message.params.domain === undefined) {
+            console.error(`Raptor Response missing params domain.` + message);
+            return false;
+        }
+    }
+    return true;
+}

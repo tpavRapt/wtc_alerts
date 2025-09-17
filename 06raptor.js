@@ -59,71 +59,7 @@ function getIndexedDbMessage(messageId) {
 let clientVersion = undefined;
 let clientUser = undefined;
 
-function ValidateRequestFromRaptor(message) {
-    if (message.id === undefined) {
-        console.error(`Raptor Request missing id.` + message);
-        return false;
-    } else if (message.timestamp === undefined) {
-        console.error(`Raptor Request missing timestamp.` + message);
-        return false;
-    } else if (message.method === undefined) {
-        console.error(`Raptor Request missing method.` + message);
-        return false;
-    } else if (message.params === undefined) {
-        console.error(`Raptor Request missing params.` + message);
-        return false;
-    }
-    if (Array.isArray(message.params))// params is array
-    {
-        message.params.forEach(element => {
-            if (element.domain === undefined) {
-                console.error(`Raptor Request missing domain from param array.` + message);
-                return false;
-            }
-        });
-    }
-    else // params is object
-    {
-        if (message.params.domain === undefined) {
-            console.error(`Raptor Request missing params domain.` + message);
-            return false;
-        }
-    }
-    return true;
-}
 
-function ValidateResponseFromRaptor(message) {
-    if (message.id === undefined) {
-        console.error(`Raptor Response missing id.` + message);
-        return false;
-    } else if (message.timestamp === undefined) {
-        console.error(`Raptor Response missing timestamp.` + message);
-        return false;
-    } else if (message.status === undefined) {
-        console.error(`Raptor Response missing status.` + message);
-        return false;
-    } else if (message.params === undefined) {
-        console.error(`Raptor Response missing params.` + message);
-        return false;
-    }
-    if (Array.isArray(message.params))// params is array
-    {
-        message.params.forEach(element => {
-            if (element.domain === undefined) {
-                console.error(`Raptor Response missing domain from param array.` + message);
-                return false;
-            }
-        });
-    }
-    else // params is object
-    {
-        if (message.params.domain === undefined) {
-            console.error(`Raptor Response missing params domain.` + message);
-            return false;
-        }
-    }
-    return true;
-}
 
 $(document).ready(
     function () {
@@ -376,10 +312,6 @@ $(document).ready(
             }
         }
 
-        function removeMilliseconds(field) {
-            let noMili = field.split('.')[0];
-            return noMili;
-        }
 
         function addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime) {
             console.log(`Adding Alert Row:` + message.id);
