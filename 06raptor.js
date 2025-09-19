@@ -503,20 +503,15 @@ $(document).ready(
         }
 
         function calcPercentage(a, b) {
-
-            if (isNaN(b) === true) {
-                const na = Number(a);
-                const nb = '1';
-                let result = na / nb;
-                return result;
-            } else {
-                const na = Number(a);
-                const nb = Number(b);
-                let result = na / nb;
-                return result * 100;
-            }
-
-
+            let result = 0;
+            let na = Number(a);
+            let nb;
+            if (isNaN(b) === true)
+                nb = 100;
+            else
+                nb = Number(b);
+            result = (na / nb) * 100;
+            return Math.round(result);
         }
 
         function findCommonElement(arr1, arr2) {
@@ -724,7 +719,7 @@ $(document).ready(
                 Time: lclCompletionTime || 'Missing',
                 Symbol: params.symbol + (params.raiexchangeid!==undefined?` (${params.raiexchangeid})` : ' (NoExch)'),
                 Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
-                'Qty (avai/exec)': (formatShares(params.availqty) + ' / ' + formatShares(params.cumqty) + ' (' + calcPercentage(params.cumqty, params.availqty) + '%)') || 'Missing',
+                'Qty (avai/exec)': (formatShares(params.availqty) + ' / ' + formatShares(params.cumqty) + ' (~' + calcPercentage(params.cumqty, params.availqty) + '%)') || 'Missing',
                 Side: fullSide(params.side) || 'Missing',
                 User: fistUserName(params.sourcelogonname) || 'Missing'
             };
@@ -782,7 +777,7 @@ $(document).ready(
                 Time: removeMilliseconds(lclCompletionDateTime) || 'Missing',
                 Symbol: params.symbol + (params.raiexchangeid!==undefined?` (${params.raiexchangeid})` : ' (NoExch)'),
                 Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
-                'Qty (avai/exec)': (formatShares(params.orderqty) + ' / ' + formatShares(params.cumqty) + ' (' + calcPercentage(params.cumqty, params.orderqty) + '%)') || 'Missing',
+                'Qty (avai/exec)': (formatShares(params.orderqty) + ' / ' + formatShares(params.cumqty) + ' (~' + calcPercentage(params.cumqty, params.orderqty) + '%)') || 'Missing',
                 Side: fullSide(params.side) || 'Missing',
                 User: fistUserName(params.sourcelogonname) || 'Missing'
             };
