@@ -1,6 +1,3 @@
-// Initialize LokiJS database and collection for messages
-var db = new loki('messages.db');
-var messagesCollection = db.addCollection('messages');
 
 // IndexedDB helpers
 const WTC_DB_NAME = 'WTCAlertsDB';
@@ -1069,13 +1066,11 @@ $(document).ready(
                 if (Array.isArray(messages)) {
                     messages.forEach(msg => {
                         console.info(`[${getLclTimeStr()}] Rcv: ${JSON.stringify(msg)}`);
-                        messagesCollection.insert(msg);
                         upsertIndexedDbMessage(msg);
                         handleSingleMessage(msg)
                     });
                 } else {
                     console.info(`[${getLclTimeStr()}] Rcv: ${JSON.stringify(messages)}`);
-                    messagesCollection.insert(messages);
                     upsertIndexedDbMessage(messages);
                     handleSingleMessage(messages)
                 }
