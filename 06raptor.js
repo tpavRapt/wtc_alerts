@@ -397,16 +397,17 @@ $(document).ready(
             let compositeKey = id;// || (params.messageid + '_' + params.reftiermessageid);
             if (row.length) {
                 console.log(`Updating row: ${compositeKey} MsgType: ${params.msgtype}`);
-                let holdingsDetails = '';
-                let ioiDetails = '';
-                let orderDetails = '';
-                let histordDetails = '';
-                let histioiDetails = '';
-                let alertIOIDetails = '';
+                let alertIOIDetails = document.getElementById(`alert-${compositeKey}`)!==null ? document.getElementById(`alert-${compositeKey}`).innerHTML : '';
+                let orderDetails = document.getElementById(`orders-${compositeKey}`)!==null ? document.getElementById(`orders-${compositeKey}`).innerHTML : '';
+                let histordDetails = document.getElementById(`histord-${compositeKey}`)!==null ? document.getElementById(`histord-${compositeKey}`).innerHTML : '';
+                let histioiDetails = document.getElementById(`histioi-${compositeKey}`)!==null ? document.getElementById(`histioi-${compositeKey}`).innerHTML : '';
+                let ioiDetails = document.getElementById(`ioi-${compositeKey}`)!==null ? document.getElementById(`ioi-${compositeKey}`).innerHTML : '';
+                let holdingsDetails = document.getElementById(`holdings-${compositeKey}`)!==null ? document.getElementById(`holdings-${compositeKey}`).innerHTML : '';
 
                 //Details for IOI that generated the Alert
                 if (params.msgtype === MsgType.ALERT) {
-                    alertIOIDetails = getFormattedDetails_ALERTIOI(params, utcCompletionDateTime, lclCompletionTime);
+                    if (params.recordstate !== undefined && params.recordstate === 'acknowledged')
+                        alertIOIDetails = getFormattedDetails_ALERTIOI(params, utcCompletionDateTime, lclCompletionTime);
                 }
                 else if (params.msgtype === MsgType.IOI) {
                     //console.log('It did find domain = IOI');
@@ -432,12 +433,12 @@ $(document).ready(
                     console.warn(`Unhandled MsgType ${params.msgtype} for getFormattedDetails()`);
                 }
 
-                if (!row.child.isShown()) {
-                    //console.log("SHOW");
+                const hasClass = row.node().classList.contains('shown');
+                if (hasClass) {
+                    console.log(`SHOW CHILD DATA`);
                     //var curScrollTop = $(window).scrollTop();
                     //$('html').toggleClass('noscroll').css('top', '-' + curScrollTop + 'px');
 
-                    let tr = $(row.node());
                     // Show drop down for row
                     let childContent = `
                             <tr>
@@ -452,37 +453,30 @@ $(document).ready(
                     if (alertIOIDetails === '' && orderDetails === '' && histordDetails === '' && ioiDetails === '' && histioiDetails === '' && holdingsDetails === '')
                         childContent = `<tr>NO DATA</tr>`
                     row.child(childContent).show();
-                    tr.addClass('shown');
                     //$('html').toggleClass('noscroll');
                 } else {
                     console.log("UPDATE CHILD DATA");
-                    if (params.msgtype === MsgType.IOI) { // IIOI
+                    if (params.msgtype == MsgType.ALERT) {
+                        $(`#alert-${compositeKey}`).html(alertIOIDetails);;
+                    }
+                    else if (params.msgtype === MsgType.IOI) { // IIOI
                         if (params.domain === Domain.HISTORY)
                             $(`#histioi-${compositeKey}`).html(histioiDetails);  // HISTORICALORDER
                         else
                             $(`#ioi-${compositeKey}`).html(ioiDetails);
                     }
                     else if (params.msgtype === MsgType.FSMDCORDER || params.msgtype === MsgType.FSMINORDER) {
-                        // Only update the Order cell
                         if (params.domain === Domain.ORDER)
                             $(`#orders-${compositeKey}`).html(orderDetails); // INTRADAYORDER
                         if (params.domain === Domain.HISTORY)
                             $(`#histord-${compositeKey}`).html(histordDetails);  // HISTORICALORDER
                     }
-                    // If the row is already shown, update its content separately
                     else if (params.msgtype === MsgType.HOLDINGSDATA) { // HOLDINGS
-                        // Only update the Holdings cell
                         $(`#holdings-${compositeKey}`).html(holdingsDetails);
-                    }
-                    else if (params.msgtype == MsgType.ALERT) {
-                        ;
                     }
                     else {
                         console.error(`Unhandled MsgType ${params.msgtype} for pageopen`);
                     }
-                    // if (params.msgtype === 'IOI') {
-                    //     $(`#alert-${compositeKey}`).html(alertIOIDetails);
-                    // }
                 }
             } else {
                 console.error(`Row not found for compositeKey: ${compositeKey}`);
@@ -536,7 +530,7 @@ $(document).ready(
             const selectedData = {
                 'Received IOI': findCommonElement(params.ioiattrib, aArgs),
                 Time: lclCompletionTime || 'Missing',
-                Symbol: params.symbol + (params.exdestination!==undefined?` (${params.exdestination})` : ' (NoExch)'),
+                Symbol: params.symbol + (params.exdestination !== undefined ? ` (${params.exdestination})` : ' (NoExch)'),
                 Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
                 Side: fullSide(params.side) || 'Missing',
                 IOIShares: formatShares(params.ioishares) || 'Missing',
@@ -596,7 +590,7 @@ $(document).ready(
             const selectedData = {
                 Type: 'Intraday IOI' || 'Missing',
                 Time: lclCompletionTime || 'Missing',
-                Symbol: params.symbol + (params.exdestination!==undefined?` (${params.exdestination})` : ' (NoExch)'),
+                Symbol: params.symbol + (params.exdestination !== undefined ? ` (${params.exdestination})` : ' (NoExch)'),
                 Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
                 Side: fullSide(params.side) || 'Missing',
                 IOIShares: formatShares(params.ioishares) || 'Missing',
@@ -655,7 +649,7 @@ $(document).ready(
             const selectedData = {
                 Type: 'Historical IOI' || 'Missing',
                 Time: removeMilliseconds(lclCompletionDateTime) || 'Missing',
-                Symbol: params.symbol  + (params.exdestination!==undefined?` (${params.exdestination})` : ' (NoExch)'),
+                Symbol: params.symbol + (params.exdestination !== undefined ? ` (${params.exdestination})` : ' (NoExch)'),
                 Price: (params.ordtype === 'Market') ? params.ordtype : formatPrice(params.reforderprice) || 'Market',
                 Side: fullSide(params.side) || 'Missing',
                 IOIShares: formatShares(params.ioishares) || 'Missing',
@@ -714,7 +708,7 @@ $(document).ready(
             const selectedData = {
                 Type: 'Order',
                 Time: lclCompletionTime || 'Missing',
-                Symbol: params.symbol + (params.raiexchangeid!==undefined?` (${params.raiexchangeid})` : ' (NoExch)'),
+                Symbol: params.symbol + (params.raiexchangeid !== undefined ? ` (${params.raiexchangeid})` : ' (NoExch)'),
                 Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
                 'Qty (avai/exec)': (formatShares(params.availqty) + ' / ' + formatShares(params.cumqty) + ' (~' + calcPercentage(params.cumqty, params.availqty) + '%)') || 'Missing',
                 Side: fullSide(params.side) || 'Missing',
@@ -772,7 +766,7 @@ $(document).ready(
             const selectedData = {
                 Type: 'Historical Order' + ` (${params.msgtype})`,
                 Time: removeMilliseconds(lclCompletionDateTime) || 'Missing',
-                Symbol: params.symbol + (params.raiexchangeid!==undefined?` (${params.raiexchangeid})` : ' (NoExch)'),
+                Symbol: params.symbol + (params.raiexchangeid !== undefined ? ` (${params.raiexchangeid})` : ' (NoExch)'),
                 Price: ((params.avgpx === '0') ? formatPrice(params.avgpx) : 'Market') || 'Missing',
                 'Qty (avai/exec)': (formatShares(params.orderqty) + ' / ' + formatShares(params.cumqty) + ' (~' + calcPercentage(params.cumqty, params.orderqty) + '%)') || 'Missing',
                 Side: fullSide(params.side) || 'Missing',
@@ -969,27 +963,24 @@ $(document).ready(
                         updateAlertMessage(message, params, lclCompletionTime, utcCompletionDateTime, row);
                     } else if (params.resend !== undefined && params.resend === 'yes') { // Reload old alerts
                         addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
+                        return;
                     } else {
-                        console.error(`Update for non existent row ${row}`);
+                        console.error(`Update for non existent row ${compositeKey}`);
+                        return;
                     }
-                    return;
+                }
+                else { // new alert
+                    addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
+                    row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
                 }
                 if (params.msgtype === undefined) {
-                    console.error(`NO MsgType!!:${message.message}`);
+                    console.warn(`NO DATA:${message.message}`);
+                    addNoDataDetails(compositeKey, params, row);
                     return;
                 }
-
-                if (row.length) {
-                    addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
-                } else {
-                    addAlertMessage(message, params, historic, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime);
-                    if (params.resend !== undefined && params.resend === 'no') {
-                        row = historic ? tableH.row('#row-' + compositeKey) : table.row('#row-' + compositeKey);
-                        addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
-                    }
-                }
+                addResponseDetails(compositeKey, params, utcCompletionDateTime, lclCompletionDateTime, lclCompletionTime, row);
             } else if (params.domain === Domain.ALERT) { // but response to a request, not a wtc gemerated alert
-                console.log(`Alert response`);
+                console.log(`Alert response (non WTC)`);
             } else if (params.domain === Domain.SYSTEM) {
                 console.log(`System response`);
                 if (params.domainRef === DomainRef.VERSION) {
@@ -1089,7 +1080,7 @@ $(document).ready(
         //        }
 
         // User Acknowledgement of WTC alert from RaptorClient
-        function userAckAlert(compositeKey, RecordState) {//, RefTierMessageID) {
+        function alertDetail(compositeKey, RecordState) {
             const parts = compositeKey.toString().split('_');
             const _params = {
                 domain: Domain.ALERT,
@@ -1099,16 +1090,18 @@ $(document).ready(
                 //messageId: compositeKey.split('_')[0],
                 //RefTierMessageID: RefTierMessageID
             };
-            const userAckMessage = AddRequiredRequestKeys(compositeKey, 'PUT', _params);
-            if (RecordState.includes('Acknowledged')) {
-                console.log('Alert already Acknowledged.');
+            let userAckMessage;
+            if (compositeKey.endsWith('_H') || RecordState.includes('Acknowledged')) {
+                console.log('Get Alert details');
+                userAckMessage = AddRequiredRequestKeys(compositeKey, 'GET', _params);
             } else {
                 console.log(`User Acknowledging alert for compositeKey: ${compositeKey} with RecordState: ${RecordState}`);
-                SendMessage(userAckMessage);
+                userAckMessage = AddRequiredRequestKeys(compositeKey, 'PUT', _params);
             }
+            SendMessage(userAckMessage);
         }
 
-        // Historic - User clicked on blue arrow to drop down details of alert
+        // Historic - User clicked on blue arrow (ARROWBTN) to drop down details of alert
         $('#messagesTableHistoric tbody').on('click', 'td.details-control', function () {
             let tr = $(this).closest('tr');
             let row = tableH.row(tr);
@@ -1121,13 +1114,14 @@ $(document).ready(
             let holdingsID = row.data()[tableCols.HOLDINGSID];
             console.log(`ROW:${row.data()}`);
             if (row.child.isShown()) {
-                //console.log("HIDE");                
+                console.log("HIDE");
+                tr.removeClass('shown'); // ARROWBTN
                 row.child.hide();
-                tr.removeClass('shown');
             }
             else {
-                //User acknowledges the alert
-                //userAckAlert(compositeKey, RecordState);//, RefTierMessageID);
+                console.log("SHOW");
+                tr.addClass('shown'); // ARROWBTN
+                alertDetail(`${compositeKey}_H`, RecordState);
 
                 ///Retrieves the IOI that generated the Alert
                 //console.log(`Sending request for ALERTED IOI for ${compositeKey.split('_')[0]}`);
@@ -1159,7 +1153,7 @@ $(document).ready(
             }
         })
 
-        // User clicked on blue arrow to drop down details of alert
+        // User clicked on blue arrow (ARROWBTN) to drop down details of alert
         $('#messagesTable tbody').on('click', 'td.details-control', function () {
             let tr = $(this).closest('tr');
             let row = table.row(tr);
@@ -1171,60 +1165,19 @@ $(document).ready(
             let side = row.data()[tableCols.SIDE];
             let holdingsID = row.data()[tableCols.HOLDINGSID];
             console.log(`ROW:${row.data()}`);
-            let bRunLookups = false;
             if (row.child.isShown()) {
-                //let childRowElement = row.child(); // child row's DOM element
-                //if (childRowElement.length > 0) {
-                //    let elementToUpdate = childRowElement.find(`#alert-${compositeKey}`)[0];
-                //    if (elementToUpdate !== undefined) {
-                //        //let txt = childRowElement.text();
-                //        let myId = elementToUpdate.id;
-                //        if (document.getElementById(myId).getElementsByTagName('div')[0] !== undefined) {
-                //            const computedStyle = window.getComputedStyle(document.getElementById(myId).getElementsByTagName('div')[0], "")
-                //            let clr = computedStyle.borderColor;
-                //            //console.log(`MYID:${myId}`);
-                //            //console.log(`DATA:${txt}`);
-                //            //console.log(`COLR:${clr}`);
-                //            let myOrange = { r: 255, g: 165, b: 0 };
-                //            let myColor = rgbToObj(clr);
-                //            //console.log(`OBJ:${JSON.stringify(myColor)}`);
-                //            if (areColorsEqual(myColor, myOrange)) {
-                //                //console.log(`Found ORANGE`);
-                //                //User acknowledges the alert
-                //                bRunLookups = true;
-                //                let childContent = `
-                //                <tr>
-                //                    <td style="vertical-align: top;" id="alert-${compositeKey}"></td>    
-                //                    <td style="vertical-align: top;" id="orders-${compositeKey}"></td>
-                //                    <td style="vertical-align: top;" id="hist-${compositeKey}"></td>
-                //                    <td style="vertical-align: top;" id="ioi-${compositeKey}"></td>
-                //                    <td style="vertical-align: top;" id="holdings-${compositeKey}"></td>
-                //                </tr>
-                //                `;
-                //                row.child(childContent);
-                //            } else {
-                //                //console.log(`NOT ORANGE`);
-                //            }
-                //        }
-                //    }
-                //} else {
-                //    console.log(`No child!`);
-                //}
-                if (!bRunLookups) {
-                    //console.log("HIDE");
-                    //var curScrollTop = $(window).scrollTop();
-                    //$('html').toggleClass('noscroll').css('top', '-' + curScrollTop + 'px');
-
-                    row.child.hide();
-                    tr.removeClass('shown');
-
-                    //$('html').toggleClass('noscroll');
-                }
+                console.log("HIDE");
+                //var curScrollTop = $(window).scrollTop();
+                //$('html').toggleClass('noscroll').css('top', '-' + curScrollTop + 'px');
+                tr.removeClass('shown'); // ARROWBTN
+                row.child.hide();
+                //$('html').toggleClass('noscroll');
             }
             else {
-                //if (bRunLookups) {
+                console.log("SHOW");
+                tr.addClass('shown'); // ARROWBTN
                 //User acknowledges the alert
-                userAckAlert(compositeKey, RecordState);//, RefTierMessageID);
+                alertDetail(compositeKey, RecordState);
 
                 ///Retrieves the IOI that generated the Alert
                 //console.log(`Sending request for ALERTED IOI for ${compositeKey.split('_')[0]}`);
@@ -1264,7 +1217,7 @@ $(document).ready(
             let rowClient = row.data()[tableCols.CLIENT];
             let rowSymbol = row.data()[tableCols.IOISYMBOL];
             let compositeKey = row.data()[tableCols.ID];
-            let badgeText = $(this).text(); 
+            let badgeText = $(this).text();
             console.log(`Opening Sales Dashboard for ${badgeText} - client ${rowClient} and ${rowSymbol} `);
             const postObj = new PostMessage(compositeKey, rowClient, null, rowSymbol, null);
             SendMessage(postObj.openFilteredDashboard(badgeText));
